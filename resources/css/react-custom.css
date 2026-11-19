@@ -1,0 +1,32 @@
+/* Only what Bootstrap cannot do. Everything else uses Bootstrap utilities. */
+
+/* Hero background */
+.school-dash .sd-hero {
+    background:
+        radial-gradient(120% 140% at 100% 0%, rgba(99, 153, 239, .5) 0%, rgba(99, 153, 239, 0) 55%),
+        linear-gradient(135deg, #14307a 0%, #1d4ed8 100%);
+}
+
+/* Attendance ring (conic-gradient is not available as a Bootstrap utility) */
+.school-dash .sd-ring {
+    width: clamp(120px, 18vw, 170px);
+    aspect-ratio: 1;
+    background: conic-gradient(#fff calc(var(--value) * 1%), rgba(255, 255, 255, .22) 0);
+}
+
+.school-dash .sd-ring__inner {
+    background: #14307a;
+}
+
+/* Card hover lift, mouse devices only */
+@media (hover: hover) {
+    .school-dash .sd-lift { transition: transform .2s ease, box-shadow .2s ease; }
+    .school-dash .sd-lift:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 28px rgba(20, 35, 70, .12) !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .school-dash .sd-lift { transition: none; }
+}
