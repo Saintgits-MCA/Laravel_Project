@@ -57,7 +57,7 @@
                                 Total: {{ $users->total() }}
                             </span>
 
-                            <button type="button"
+                           <button type="button"
                                     class="btn btn-danger px-3 py-2 fw-semibold"
                                     id="addUserBtn"
                                     data-bs-toggle="modal"
@@ -338,7 +338,7 @@
                                        name="password"
                                        id="password"
                                        class="form-control @error('password') is-invalid @enderror"
-                                       placeholder="Minimum 8 characters"
+                                       placeholder="Minimum 4 characters"
                                        autocomplete="new-password">
 
                                 <button class="btn password-toggle"

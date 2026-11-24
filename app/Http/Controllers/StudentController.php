@@ -67,7 +67,7 @@ class StudentController extends Controller
 
         return redirect()
             ->route('students')
-            ->with('success', 'Student registered successfully!');
+            ->with('success', 'Student Registered Successfully!');
     }
 
     // Update an existing student
@@ -91,7 +91,7 @@ class StudentController extends Controller
 
         return redirect()
             ->route('students')
-            ->with('success', 'Student updated successfully!');
+            ->with('success', 'Student Updated Successfully!');
     }
 
     // Delete a student

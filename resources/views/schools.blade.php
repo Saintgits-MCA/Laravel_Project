@@ -29,14 +29,14 @@
                     
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
                         <div>
-                            <h4 class="school-heading mb-1"><i class="bi bi-building-fill me-2"></i> Registered Schools</h4>
+                         <h4 class="school-heading mb-1"><i class="bi bi-building-fill me-2"></i> Registered Schools</h4>
                             <small class="text-muted">Manage your school records</small>
                         </div>
                         <div class="d-flex align-items-center gap-3">
                             <span class="badge bg-danger rounded-pill px-3 py-2">Total: {{ $schools->total() }}</span>
-                            <button type="button" class="btn btn-danger px-3 py-2 fw-semibold" data-bs-toggle="modal" data-bs-target="#schoolModal" id="addSchoolBtn">
+                            @auth<button type="button" class="btn btn-danger px-3 py-2 fw-semibold" data-bs-toggle="modal" data-bs-target="#schoolModal" id="addSchoolBtn">
                                 <i class="bi bi-plus-circle me-2"></i> Add New School
-                            </button>
+                            </button>@endauth
                         </div>
                     </div>
 
@@ -63,8 +63,8 @@
                                         <td>{{ $school->school_code }}</td>
                                         <td>{{ $school->email ?? 'N/A' }}</td>
                                         <td>{{ $school -> phone ?? 'N/A' }}</td>
-                                        <td>{{ $school->city ?? 'N/A' }}{{ $school->state ? ', ' . $school->state : '' }}</td>
-                                        <td>{{$school -> address ?? 'N/A'}}</td>
+                                        <td>{{ $school->city ?? 'N/A' }}{{ $school->state ? ', ' . $school->state : '' }}{{ $school->pincode ? ', ' . $school->pincode : '' }}</td>
+                                        <td>{{$school -> address ?? '-'}}</td>
                                         <td>
                                             @if(strtolower($school->status) === 'active')
                                                 <span class="badge bg-success">Active</span>

@@ -22,7 +22,6 @@ return new class extends Migration
             $table->string('state')->nullable();
             $table->string('pincode')->nullable();
             $table->string('status')->default('active'); // Defaults to active
-            
             $table->timestamps();
         });
     }

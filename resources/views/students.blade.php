@@ -58,7 +58,7 @@
                                 Total: {{ $students->total() }}
                             </span>
 
-                            <button type="button"
+                            @auth<button type="button"
                                     class="btn btn-danger px-3 py-2 fw-semibold"
                                     data-bs-toggle="modal"
                                     data-bs-target="#studentModal"
@@ -66,7 +66,7 @@
 
                                 <i class="bi bi-plus-circle me-2"></i>
                                 Add New Student
-                            </button>
+                            </button>@endauth
 
                         </div>
                     </div>
