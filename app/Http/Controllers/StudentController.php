@@ -17,7 +17,8 @@ class StudentController extends Controller
             model: Student::class,
             columns: ['name', 'email', 'phone', 'course'],
             search: $request->search,
-            perPage: 5
+            perPage: 5,
+            direction: 'asc'
         );
 
         // Filter by student status

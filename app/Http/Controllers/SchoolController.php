@@ -20,7 +20,8 @@ class SchoolController extends Controller
                 'state'
             ],
             search: $request->search,
-            perPage: 5
+            perPage: 5,
+            direction: 'asc'
         );
         return view('schools', compact('schools'));
     }

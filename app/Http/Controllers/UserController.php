@@ -17,7 +17,7 @@ class UserController extends Controller
             search: $request->search,
             perPage: 5,
             orderBy: 'id',
-            direction: 'desc'
+            direction: 'asc'
         );
 
         return view('user', compact('users'));
