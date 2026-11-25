@@ -12,11 +12,7 @@ Route::get('/home', function () {
     return view('welcome');
 })->name('home');
 
-Route::get('/user', function () {
-    $users = User::paginate(5);
-
-    return view('user', compact('users'));
-})->name('user_index');
+Route::get('/user', [UserController::class, 'index'])->name('user_index');
 
 // Add user from the modal
 Route::post('/users', [UserController::class, 'store'])

@@ -5,36 +5,30 @@ namespace App\Http\Controllers;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Services\SearchService;
 
 class StudentController extends Controller
 {
     // Display registration form and student list
-    public function index(Request $request)
-    {    
-        $query = Student::query();
-         if ($request->filled('search')) {
+    public function index(Request $request, SearchService $searchService)
+    {
+        // Common search using SearchService
+        $students = $searchService->search(
+            model: Student::class,
+            columns: ['name', 'email', 'phone', 'course'],
+            search: $request->search,
+            perPage: 5
+        );
 
-        $search = $request->search;
+        // Filter by student status
+        if (in_array($request->status, ['Active', 'Inactive'])) {
+            $students = Student::whereIn('id', $students->pluck('id'))
+                ->where('status', $request->status)
+                ->latest()
+                ->paginate(5)
+                ->withQueryString();
+        }
 
-        $query->where(function ($q) use ($search) {
-
-            $q->where('name', 'LIKE', "%{$search}%")
-              ->orWhere('email', 'LIKE', "%{$search}%")
-              ->orWhere('phone', 'LIKE', "%{$search}%")
-              ->orWhere('course', 'LIKE', "%{$search}%");
-
-        });
-    }
-
-    // Filter by student status
-    if (in_array($request->status, ['Active', 'Inactive'])) {
-
-        $query->where('status', $request->status);
-    }
-
-        $students = $query->latest()
-                      ->paginate(5)
-                      ->withQueryString();
         // Load a student into the form when Edit is clicked
         $editingStudent = $request->query('edit')
             ? Student::findOrFail($request->query('edit'))

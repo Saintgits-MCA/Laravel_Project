@@ -35,8 +35,7 @@
             {{-- Users table card --}}
             <div class="card user-list-card">
 
-                <div class="card-body py-3 p-md-4">
-
+       <div class="card-body py-3 p-md-4" data-live-search data-url="{{ route('user_index') }}">
                     {{-- Table heading and Add button --}}
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
 
@@ -53,10 +52,31 @@
 
                         <div class="d-flex align-items-center gap-3">
 
-                            <span class="badge bg-danger rounded-pill px-3 py-2">
+                            <span class="badge bg-danger rounded-pill px-3 py-2" data-search-total>
                                 Total: {{ $users->total() }}
                             </span>
-
+                            {{-- Live Search with Clear Button --}}
+                            <form action="{{ route('user_index') }}" class="mt-2" method="GET" data-search-form class="mb-4">
+                            
+                                <div class="input-group" style="max-width: 350px;">
+                            
+                                    <span class="input-group-text bg-white">
+                                        <i class="bi bi-search"></i>
+                                    </span>
+                            
+                                    <input type="text" name="search" id="userSearch" class="form-control" placeholder="Search users..."
+                                        value="{{ request('search') }}" data-search-input autocomplete="off">
+                            
+                                    <button type="button" class="btn btn-outline-secondary" id="clearUserSearch" aria-label="Clear search"
+                                        style="{{ request('search') ? '' : 'display: none;' }}">
+                            
+                                        <i class="bi bi-x-lg"></i>
+                            
+                                    </button>
+                            
+                                </div>
+                            
+                            </form>
                            <button type="button"
                                     class="btn btn-danger px-3 py-2 fw-semibold"
                                     id="addUserBtn"
@@ -86,7 +106,7 @@
                                 </tr>
                             </thead>
 
-                            <tbody>
+                            <tbody data-search-results>
 
                                 @forelse($users as $user)
 
@@ -144,7 +164,7 @@
                     {{-- Custom Pagination --}}
                     @if($users->total() >= 0)
 
-                        <div class="pagination-wrapper d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div class="pagination-wrapper d-flex justify-content-between align-items-center flex-wrap gap-3" data-search-pagination>
 
                             <div class="pagination-info">
 
@@ -259,8 +279,8 @@
                     {{-- Add / Edit Form --}}
                     <form id="userForm"
                           action="{{ old('_editing_id')
-                              ? route('users.update', old('_editing_id'))
-                              : route('users.store') }}"
+    ? route('users.update', old('_editing_id'))
+    : route('users.store') }}"
                           method="POST">
 
                         @csrf
@@ -328,7 +348,7 @@
 
                             <label for="password"
                                    class="form-label fw-semibold"
-                                   id="passwordLabel">
+                                   id="passwordLabel" value="{{ old('password') }}">
                                 Password
                             </label>
 
@@ -339,7 +359,7 @@
                                        id="password"
                                        class="form-control @error('password') is-invalid @enderror"
                                        placeholder="Minimum 4 characters"
-                                       autocomplete="new-password">
+                                       autocomplete="new-password" value="{{ old('password') }}">
 
                                 <button class="btn password-toggle"
                                         type="button"
@@ -432,6 +452,7 @@
 
     {{-- Bootstrap JavaScript --}}
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('js/live-search.js') }}"></script>
 
     <script>
         // Password Show / Hide
@@ -458,7 +479,30 @@
         }
 
         document.addEventListener('DOMContentLoaded', function () {
+            // Live search clear button
+const userSearch = document.getElementById('userSearch');
+const clearUserSearch = document.getElementById('clearUserSearch');
 
+function updateClearButton() {
+    clearUserSearch.style.display =
+        userSearch.value.trim() !== '' ? 'block' : 'none';
+}
+
+userSearch.addEventListener('input', updateClearButton);
+
+clearUserSearch.addEventListener('click', function () {
+
+    userSearch.value = '';
+
+    updateClearButton();
+
+    // Trigger shared AJAX live search
+    userSearch.dispatchEvent(
+        new Event('input', { bubbles: true })
+    );
+
+    userSearch.focus();
+});
             const userModal = document.getElementById('userModal');
             const userForm = document.getElementById('userForm');
 
@@ -510,48 +554,53 @@
 
                 });
 
-            // Fill modal for editing an existing user
-            document.querySelectorAll('.editUserBtn')
-                .forEach(function (button) {
+           userModal.addEventListener('show.bs.modal', function (event) {
 
-                    button.addEventListener('click', function () {
+                const button = event.relatedTarget;
 
-                        userForm.reset();
+                // Only execute when Edit button opens the modal
+                if (!button || !button.classList.contains('editUserBtn')) {
+                    return;
+                }
 
-                        userForm.action = this.dataset.url;
+                userForm.reset();
 
-                        editingId.value = this.dataset.id;
-                        formMethod.value = 'PUT';
+                // Set update URL
+                userForm.action = button.dataset.url;
 
-                        nameInput.value = this.dataset.name || '';
-                        emailInput.value = this.dataset.email || '';
+                editingId.value = button.dataset.id;
+                formMethod.value = 'PUT';
 
-                        // Password is optional when editing
-                        passwordInput.value = this.dataset.password || '';
-                        confirmPasswordInput.value = this.dataset.password || '';
+                // Prefill user details
+                nameInput.value = button.dataset.name || '';
+                emailInput.value = button.dataset.email || '';
 
-                        passwordInput.required = false;
-                        confirmPasswordInput.required = false;
+                // Prefill existing password (your current plain-text setup)
+                passwordInput.value = button.dataset.password || '';
+                confirmPasswordInput.value = button.dataset.password || '';
 
-                        modalTitle.innerHTML =
-                            '<i class="bi bi-pencil-square me-2"></i> Edit User';
+                // Password is optional during editing
+                passwordInput.required = false;
+                confirmPasswordInput.required = false;
 
-                        modalDescription.textContent =
-                            'Update the user details below.';
+                // Update modal heading
+                modalTitle.innerHTML =
+                    '<i class="bi bi-pencil-square me-2"></i> Edit User';
 
-                        passwordLabel.textContent = 'New Password';
-                        passwordInput.placeholder =
-                            'Leave blank to keep current password';
+                modalDescription.textContent =
+                    'Update the user details below.';
 
-                        passwordHelp.textContent =
-                            'Only change a password if you want to change it.';
+                passwordLabel.textContent = 'Password';
 
-                        saveButton.innerHTML =
-                            '<i class="bi bi-check-circle me-2"></i> Update User';
+                passwordInput.placeholder = 'Enter password';
 
-                    });
+                passwordHelp.textContent =
+                    'You can keep or change the existing password.';
 
-                });
+                saveButton.innerHTML =
+                    '<i class="bi bi-check-circle me-2"></i> Update User';
+
+            });
 
             // Reopen modal when validation fails
             @if($errors->any())

@@ -6,12 +6,21 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
-
+use App\Services\SearchService;
 class UserController extends Controller
 {
-   public function create()
-    {   
-        return view('user');
+   public function index(Request $request, SearchService $searchService)
+    {
+        $users = $searchService->search(
+            model: User::class,
+            columns: ['name', 'email'],
+            search: $request->search,
+            perPage: 5,
+            orderBy: 'id',
+            direction: 'desc'
+        );
+
+        return view('user', compact('users'));
     }
 
     public function store(Request $request)

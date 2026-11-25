@@ -1,14 +1,13 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Students | Element</title>
 
-    <link rel="icon" type="image/png"
-          href="{{ asset('images/favicon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
 
     <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/nav.css') }}" rel="stylesheet">
@@ -36,7 +35,8 @@
             {{-- Student list --}}
             <div class="card student-list-card">
 
-                <div class="card-body p-3 p-md-4">
+                {{-- Live search wrapper --}}
+                <div class="card-body p-3 p-md-4" data-live-search data-url="{{ route('students') }}">
 
                     {{-- Table heading and Add button --}}
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
@@ -55,70 +55,82 @@
                         <div class="d-flex align-items-center gap-3">
 
                             <span class="badge bg-danger rounded-pill px-3 py-2">
-                                Total: {{ $students->total() }}
+                                Total:
+                                <span data-search-total>{{ $students->total() }}</span>
                             </span>
 
-                            @auth<button type="button"
-                                    class="btn btn-danger px-3 py-2 fw-semibold"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#studentModal"
-                                    id="addStudentBtn">
+                            @auth
+                                <button type="button" class="btn btn-danger px-3 py-2 fw-semibold" data-bs-toggle="modal"
+                                    data-bs-target="#studentModal" id="addStudentBtn">
 
-                                <i class="bi bi-plus-circle me-2"></i>
-                                Add New Student
-                            </button>@endauth
+                                    <i class="bi bi-plus-circle me-2"></i>
+                                    Add New Student
+                                </button>
+                            @endauth
 
                         </div>
                     </div>
 
+                    {{-- Search and status filter --}}
+                    <form action="{{ route('students') }}" method="GET" class="row g-3 align-items-end mb-4"
+                        data-search-form>
+
+                        {{-- Search with Clear Button --}}
+                        <div class="col-md-5">
+
+                            <label for="studentSearch" class="form-label fw-semibold">
+                                Search Students
+                            </label>
+
+                            <div class="input-group">
+
+                                <span class="input-group-text bg-white">
+                                    <i class="bi bi-search"></i>
+                                </span>
+
+                                <input type="text" name="search" id="studentSearch" class="form-control"
+                                    placeholder="Enter name, email, phone or course" value="{{ request('search') }}"
+                                    data-search-input autocomplete="off">
+
+                                <button type="button" class="btn btn-outline-secondary" id="clearStudentSearch"
+                                    aria-label="Clear search" style="{{ request('search') ? '' : 'display: none;' }}">
+
+                                    <i class="bi bi-x-lg"></i>
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        {{-- Status Filter --}}
+                        <div class="col-md-3">
+
+                            <label for="status_filter" class="form-label fw-semibold">
+                                Filter by Status
+                            </label>
+
+                            <select name="status" id="status_filter" class="form-select" data-search-filter>
+
+                                <option value="">All Students</option>
+
+                                <option value="Active" {{ request('status') == 'Active' ? 'selected' : '' }}>
+                                    Active
+                                </option>
+
+                                <option value="Inactive" {{ request('status') == 'Inactive' ? 'selected' : '' }}>
+                                    Inactive
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </form>
+
                     {{-- Students table --}}
                     <div class="table-responsive">
-                        <form action="{{ route('students') }}" method="GET"
-      class="row g-3 align-items-end mb-4">
 
-    {{-- Search by name, email, phone or course --}}
-    <div class="col-md-5">
-        <label for="search" class="form-label fw-semibold">
-            Search Students
-        </label>
-
-        <input
-            type="text"
-            name="search"
-            id="search"
-            class="form-control"
-            placeholder="Enter name, email, phone or course"
-            value="{{ request('search') }}"
-        >
-    </div>
-
-    {{-- Filter by status --}}
-    <div class="col-md-3">
-        <label for="status_filter" class="form-label fw-semibold">
-            Filter by Status
-        </label>
-
-        <select name="status" id="status_filter" class="form-select">
-            <option value="">All Students</option>
-
-            <option value="Active"
-                {{ request('status') == 'Active' ? 'selected' : '' }}>
-                Active
-            </option>
-
-            <option value="Inactive"
-                {{ request('status') == 'Inactive' ? 'selected' : '' }}>
-                Inactive
-            </option>
-        </select>
-    </div>
-    <div class="col-md-4">
-    <button type="submit" class="btn btn-danger">Filter</button>
-
-    <a href="{{ route('students') }}"
-       class="btn btn-outline-secondary">Reset</a>
-</div>
-</form>
                         <table class="table table-hover student-table">
 
                             <thead>
@@ -130,11 +142,13 @@
                                     <th>Course</th>
                                     <th>Status</th>
                                     <th>Address</th>
-                                    @auth<th>Actions</th>@endauth
+                                    @auth
+                                        <th>Actions</th>
+                                    @endauth
                                 </tr>
                             </thead>
 
-                            <tbody>
+                            <tbody data-search-results>
 
                                 @forelse($students as $index => $student)
 
@@ -169,56 +183,53 @@
                                             {{ $student->address ?? 'N/A' }}
                                         </td>
 
-                                        @auth<td>
-                                            <div class="d-flex gap-2">
+                                        @auth
+                                            <td>
+                                                <div class="d-flex gap-2">
 
-                                                {{-- Edit button --}}
-                                                <button type="button"
-                                                        class="btn btn-sm btn-outline-primary editStudentBtn"
-                                                        title="Edit student"
-                                                        data-bs-toggle="modal"
+                                                    {{-- Edit button --}}
+                                                    <button type="button" class="btn btn-sm btn-outline-primary editStudentBtn"
+                                                        title="Edit student" data-bs-toggle="modal"
                                                         data-bs-target="#studentModal"
                                                         data-url="{{ route('students.update', $student->id) }}"
-                                                        data-id="{{ $student->id }}"
-                                                        data-name="{{ $student->name }}"
-                                                        data-email="{{ $student->email }}"
-                                                        data-phone="{{ $student->phone }}"
+                                                        data-id="{{ $student->id }}" data-name="{{ $student->name }}"
+                                                        data-email="{{ $student->email }}" data-phone="{{ $student->phone }}"
                                                         data-course="{{ $student->course }}"
                                                         data-status="{{ $student->status }}"
                                                         data-address="{{ $student->address }}">
 
-                                                    <i class="bi bi-pencil-fill"></i>
-                                                </button>
+                                                        <i class="bi bi-pencil-fill"></i>
+                                                    </button>
 
-                                                {{-- Delete button --}}
-                                                <form action="{{ route('students.destroy', $student->id) }}"
-                                                      method="POST"
-                                                      onsubmit="return confirm('Are you sure you want to delete this student?')">
+                                                    {{-- Delete button --}}
+                                                    <form action="{{ route('students.destroy', $student->id) }}" method="POST"
+                                                        onsubmit="return confirm('Are you sure you want to delete this student?')">
 
-                                                    @csrf
-                                                    @method('DELETE')
+                                                        @csrf
+                                                        @method('DELETE')
 
-                                                    <button type="submit"
-                                                            class="btn btn-sm btn-outline-danger"
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger"
                                                             title="Delete student">
 
-                                                        <i class="bi bi-trash-fill"></i>
-                                                    </button>
-                                                </form>
+                                                            <i class="bi bi-trash-fill"></i>
+                                                        </button>
 
-                                            </div>
-                                        </td>@endauth
+                                                    </form>
+
+                                                </div>
+                                            </td>
+                                        @endauth
+
                                     </tr>
 
                                 @empty
 
                                     <tr>
-                                        <td colspan="8"
-                                            class="text-center text-muted py-5">
+                                        <td colspan="8" class="text-center text-muted py-5">
 
                                             <i class="bi bi-inbox fs-2 d-block mb-2"></i>
 
-                                            No students registered yet.
+                                            No students found.
 
                                         </td>
                                     </tr>
@@ -232,12 +243,13 @@
                     </div>
 
                     {{-- Pagination --}}
-                    @if($students->total() >= 0)
+                    <div data-search-pagination>
 
                         <div class="pagination-wrapper">
 
                             {{-- Records information --}}
                             <div class="pagination-info">
+
                                 Showing
                                 <strong>{{ $students->firstItem() ?? 0 }}</strong>
                                 to
@@ -245,6 +257,7 @@
                                 of
                                 <strong>{{ $students->total() }}</strong>
                                 students
+
                             </div>
 
                             {{-- Page navigation --}}
@@ -252,28 +265,33 @@
 
                                 {{-- Previous --}}
                                 <a href="{{ $students->previousPageUrl() ?? '#' }}"
-                                   class="student-page-link {{ $students->onFirstPage() ? 'disabled' : '' }}"
-                                   aria-label="Previous page">
+                                    class="student-page-link {{ $students->onFirstPage() ? 'disabled' : '' }}"
+                                    aria-label="Previous page">
 
                                     <i class="bi bi-chevron-left"></i>
                                 </a>
 
                                 {{-- Page numbers --}}
-                                @foreach($students->getUrlRange(1, $students->lastPage()) as $page => $url)
+                                @if($students->lastPage() > 0)
 
-                                    <a href="{{ $url }}"
-                                       class="student-page-link {{ $students->currentPage() == $page ? 'active' : '' }}"
-                                       @if($students->currentPage() == $page) aria-current="page" @endif>
+                                    @foreach($students->getUrlRange(1, $students->lastPage()) as $page => $url)
 
-                                        {{ $page }}
-                                    </a>
+                                        <a href="{{ $url }}"
+                                            class="student-page-link {{ $students->currentPage() == $page ? 'active' : '' }}"
+                                            @if($students->currentPage() == $page) aria-current="page" @endif>
 
-                                @endforeach
+                                            {{ $page }}
+
+                                        </a>
+
+                                    @endforeach
+
+                                @endif
 
                                 {{-- Next --}}
                                 <a href="{{ $students->nextPageUrl() ?? '#' }}"
-                                   class="student-page-link {{ !$students->hasMorePages() ? 'disabled' : '' }}"
-                                   aria-label="Next page">
+                                    class="student-page-link {{ !$students->hasMorePages() ? 'disabled' : '' }}"
+                                    aria-label="Next page">
 
                                     <i class="bi bi-chevron-right"></i>
                                 </a>
@@ -282,20 +300,19 @@
 
                         </div>
 
-                    @endif
+                    </div>
 
                 </div>
             </div>
 
         </div>
+
     </section>
 
+
     {{-- Add / Edit Student Modal --}}
-    <div class="modal fade student-modal"
-         id="studentModal"
-         tabindex="-1"
-         aria-labelledby="studentModalLabel"
-         aria-hidden="true">
+    <div class="modal fade student-modal" id="studentModal" tabindex="-1" aria-labelledby="studentModalLabel"
+        aria-hidden="true">
 
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
 
@@ -304,8 +321,7 @@
                 <div class="modal-header">
 
                     <div>
-                        <h5 class="modal-title student-heading"
-                            id="studentModalLabel">
+                        <h5 class="modal-title student-heading" id="studentModalLabel">
                             Add New Student
                         </h5>
 
@@ -314,10 +330,7 @@
                         </small>
                     </div>
 
-                    <button type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal"
-                            aria-label="Close">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
                     </button>
 
                 </div>
@@ -326,36 +339,35 @@
 
                     {{-- Validation errors --}}
                     @if($errors->any())
+
                         <div class="alert alert-danger">
+
                             <strong>Please correct the following:</strong>
 
                             <ul class="mb-0 mt-2">
+
                                 @foreach($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
+
                             </ul>
+
                         </div>
+
                     @endif
 
-                    <form id="studentForm"
-                          action="{{ old('_editing_id')
-                              ? route('students.update', old('_editing_id'))
-                              : route('students.store') }}"
-                          method="POST">
+                    <form id="studentForm" action="{{ old('_editing_id')
+    ? route('students.update', old('_editing_id'))
+    : route('students.store') }}" method="POST">
 
                         @csrf
 
                         {{-- Used to identify create or edit --}}
-                        <input type="hidden"
-                               name="_editing_id"
-                               id="editing_id"
-                               value="{{ old('_editing_id') }}">
+                        <input type="hidden" name="_editing_id" id="editing_id" value="{{ old('_editing_id') }}">
 
-                        {{-- Laravel method spoofing for update --}}
-                        <input type="hidden"
-                               name="_method"
-                               id="formMethod"
-                               value="{{ old('_editing_id') ? 'PUT' : 'POST' }}">
+                        {{-- Laravel method spoofing --}}
+                        <input type="hidden" name="_method" id="formMethod"
+                            value="{{ old('_editing_id') ? 'PUT' : 'POST' }}">
 
                         <div class="row g-3">
 
@@ -365,13 +377,8 @@
                                     Full Name
                                 </label>
 
-                                <input type="text"
-                                       name="name"
-                                       id="name"
-                                       class="form-control"
-                                       placeholder="Enter full name"
-                                       value="{{ old('name') }}"
-                                       required>
+                                <input type="text" name="name" id="name" class="form-control"
+                                    placeholder="Enter full name" value="{{ old('name') }}" required>
                             </div>
 
                             {{-- Email --}}
@@ -380,13 +387,8 @@
                                     Email Address
                                 </label>
 
-                                <input type="email"
-                                       name="email"
-                                       id="email"
-                                       class="form-control"
-                                       placeholder="example@email.com"
-                                       value="{{ old('email') }}"
-                                       required>
+                                <input type="email" name="email" id="email" class="form-control"
+                                    placeholder="example@email.com" value="{{ old('email') }}" required>
                             </div>
 
                             {{-- Phone --}}
@@ -395,13 +397,9 @@
                                     Phone Number
                                 </label>
 
-                                <input type="tel"
-                                       name="phone"
-                                       id="phone"
-                                       class="form-control"
-                                       pattern="^[0-9\s\+\-\(\)]+$"
-                                       placeholder="Enter phone number"
-                                       value="{{ old('phone') }}">
+                                <input type="tel" name="phone" id="phone" class="form-control"
+                                    pattern="^[0-9\s\+\-\(\)]+$" placeholder="Enter phone number"
+                                    value="{{ old('phone') }}">
                             </div>
 
                             {{-- Course --}}
@@ -410,12 +408,8 @@
                                     Course
                                 </label>
 
-                                <input type="text"
-                                       name="course"
-                                       id="course"
-                                       class="form-control"
-                                       placeholder="Enter course name"
-                                       value="{{ old('course') }}">
+                                <input type="text" name="course" id="course" class="form-control"
+                                    placeholder="Enter course name" value="{{ old('course') }}">
                             </div>
 
                             {{-- Status --}}
@@ -424,20 +418,16 @@
                                     Student Status
                                 </label>
 
-                                <select name="status"
-                                        id="status"
-                                        class="form-select"
-                                        required>
+                                <select name="status" id="status" class="form-select" required>
 
-                                    <option value="Active"
-                                        {{ old('status', 'Active') == 'Active' ? 'selected' : '' }}>
+                                    <option value="Active" {{ old('status', 'Active') == 'Active' ? 'selected' : '' }}>
                                         Active
                                     </option>
 
-                                    <option value="Inactive"
-                                        {{ old('status') == 'Inactive' ? 'selected' : '' }}>
+                                    <option value="Inactive" {{ old('status') == 'Inactive' ? 'selected' : '' }}>
                                         Inactive
                                     </option>
+
                                 </select>
                             </div>
 
@@ -447,30 +437,25 @@
                                     Address
                                 </label>
 
-                                <textarea name="address"
-                                          id="address"
-                                          rows="3"
-                                          style="resize:none"
-                                          class="form-control"
-                                          placeholder="Enter student address">{{ old('address') }}</textarea>
+                                <textarea name="address" id="address" rows="3" style="resize:none" class="form-control"
+                                    placeholder="Enter student address">{{ old('address') }}</textarea>
                             </div>
 
                         </div>
 
                         <div class="d-flex gap-2 mt-4">
 
-                            <button type="submit"
-                                    class="btn btn-danger px-4 py-2 fw-semibold"
-                                    id="saveStudentBtn">
+                            <button type="submit" class="btn btn-danger px-4 py-2 fw-semibold" id="saveStudentBtn">
 
                                 <i class="bi bi-person-plus me-2"></i>
                                 Save Student
+
                             </button>
 
-                            <button type="button"
-                                    class="btn btn-outline-secondary px-4 py-2"
-                                    data-bs-dismiss="modal">
+                            <button type="button" class="btn btn-outline-secondary px-4 py-2" data-bs-dismiss="modal">
+
                                 Cancel
+
                             </button>
 
                         </div>
@@ -482,11 +467,17 @@
         </div>
     </div>
 
-   <x-success-modal />
 
-    <x-footer/>
+    <x-success-modal />
 
+    <x-footer />
+
+
+    {{-- JavaScript --}}
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
+
+    {{-- Shared live search --}}
+    <script src="{{ asset('js/live-search.js') }}"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -508,63 +499,111 @@
             const statusInput = document.getElementById('status');
             const addressInput = document.getElementById('address');
 
+            const addStudentBtn = document.getElementById('addStudentBtn');
+
             const addStudentUrl = @json(route('students.store'));
 
+
+            // Search Clear Button
+            const studentSearch = document.getElementById('studentSearch');
+            const clearStudentSearch = document.getElementById('clearStudentSearch');
+
+            function updateClearButton() {
+
+                clearStudentSearch.style.display =
+                    studentSearch.value.trim() !== '' ? 'block' : 'none';
+
+            }
+
+            // Show or hide clear button while typing
+            studentSearch.addEventListener('input', updateClearButton);
+
+            // Clear search and trigger AJAX live search
+            clearStudentSearch.addEventListener('click', function () {
+
+                studentSearch.value = '';
+
+                updateClearButton();
+
+                // Trigger shared AJAX live search
+                studentSearch.dispatchEvent(new Event('input', {
+                    bubbles: true
+                }));
+
+                studentSearch.focus();
+
+            });
+
+
             // Open modal for adding a new student
-            document.getElementById('addStudentBtn')
-                .addEventListener('click', function () {
+            if (addStudentBtn) {
+
+                addStudentBtn.addEventListener('click', function () {
 
                     studentForm.reset();
 
                     studentForm.action = addStudentUrl;
+
                     editingId.value = '';
                     formMethod.value = 'POST';
 
                     modalTitle.textContent = 'Add New Student';
-                    modalDescription.textContent = 'Enter the student details below.';
+
+                    modalDescription.textContent =
+                        'Enter the student details below.';
 
                     saveButton.innerHTML =
                         '<i class="bi bi-person-plus me-2"></i> Save Student';
 
                     statusInput.value = 'Active';
+
                 });
 
-            // Open modal for editing an existing student
-            document.querySelectorAll('.editStudentBtn')
-                .forEach(function (button) {
+            }
 
-                    button.addEventListener('click', function () {
 
-                        studentForm.action = this.dataset.url;
+            // Open modal for editing an existing student.
+            // Event delegation keeps this working after AJAX search.
+            document.addEventListener('click', function (event) {
 
-                        editingId.value = this.dataset.id;
-                        formMethod.value = 'PUT';
+                const button = event.target.closest('.editStudentBtn');
 
-                        nameInput.value = this.dataset.name || '';
-                        emailInput.value = this.dataset.email || '';
-                        phoneInput.value = this.dataset.phone || '';
-                        courseInput.value = this.dataset.course || '';
-                        statusInput.value = this.dataset.status || 'Active';
-                        addressInput.value = this.dataset.address || '';
+                if (!button) return;
 
-                        modalTitle.textContent = 'Update Student';
-                        modalDescription.textContent =
-                            'Change the student details below.';
+                studentForm.action = button.dataset.url;
 
-                        saveButton.innerHTML =
-                            '<i class="bi bi-check-circle me-2"></i> Update Student';
-                    });
-                });
+                editingId.value = button.dataset.id;
+                formMethod.value = 'PUT';
 
-            // Reopen the modal if validation fails
+                nameInput.value = button.dataset.name || '';
+                emailInput.value = button.dataset.email || '';
+                phoneInput.value = button.dataset.phone || '';
+                courseInput.value = button.dataset.course || '';
+                statusInput.value = button.dataset.status || 'Active';
+                addressInput.value = button.dataset.address || '';
+
+                modalTitle.textContent = 'Update Student';
+
+                modalDescription.textContent =
+                    'Change the student details below.';
+
+                saveButton.innerHTML =
+                    '<i class="bi bi-check-circle me-2"></i> Update Student';
+
+            });
+
+
+            // Reopen modal if validation fails
             @if($errors->any())
 
                 const modal = new bootstrap.Modal(studentModal);
+
                 modal.show();
 
                 @if(old('_editing_id'))
 
                     modalTitle.textContent = 'Update Student';
+
                     modalDescription.textContent =
                         'Correct the details and try again.';
 
@@ -575,19 +614,27 @@
 
             @endif
 
-            // Automatically show success modal after create, update or delete
-            @if(session('success'))
 
-                const successModalElement = document.getElementById('successModal');
+                // Automatically show success modal
+                @if(session('success'))
 
-                const successModal = new bootstrap.Modal(successModalElement);
+                    const successModalElement =
+                        document.getElementById('successModal');
 
-                successModal.show();
+                    if (successModalElement) {
 
-            @endif
+                        const successModal =
+                            new bootstrap.Modal(successModalElement);
 
-        });
+                        successModal.show();
+
+                    }
+
+                @endif
+
+    });
     </script>
 
 </body>
+
 </html>

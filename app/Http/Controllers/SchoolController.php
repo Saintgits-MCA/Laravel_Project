@@ -3,13 +3,25 @@
 namespace App\Http\Controllers;
 use App\Models\School_Details;
 use Illuminate\Http\Request;
+use App\Services\SearchService;
 
 class SchoolController extends Controller
 {
-    public function index()
+    public function index(Request $request, SearchService $searchService)
     {
-        // Paginate results
-        $schools = School_Details::paginate(5);
+        $schools = $searchService->search(
+            model: School_Details::class,
+            columns: [
+                'school_name',
+                'school_code',
+                'email',
+                'phone',
+                'city',
+                'state'
+            ],
+            search: $request->search,
+            perPage: 5
+        );
         return view('schools', compact('schools'));
     }
 
