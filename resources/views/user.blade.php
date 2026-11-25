@@ -8,11 +8,6 @@
     <title>Element | Users</title>
 
     <link rel="icon" href="{{ asset('images/favicon.png') }}">
-
-    <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/nav.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/main.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/bootstrap-icons.min.css') }}" rel="stylesheet">
 </head>
 <style>
     .custom-pagination .page-item.active .page-link {
@@ -407,8 +402,6 @@ color: #dc3545;
 
     <x-footer/>
 
-    {{-- Bootstrap JavaScript --}}
-    <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('js/live-search.js') }}"></script>
 
     <script>
@@ -437,29 +430,29 @@ color: #dc3545;
 
         document.addEventListener('DOMContentLoaded', function () {
             // Live search clear button
-const userSearch = document.getElementById('userSearch');
-const clearUserSearch = document.getElementById('clearUserSearch');
+            const userSearch = document.getElementById('userSearch');
+            const clearUserSearch = document.getElementById('clearUserSearch');
 
-function updateClearButton() {
-    clearUserSearch.style.display =
-        userSearch.value.trim() !== '' ? 'block' : 'none';
-}
+            function updateClearButton() {
+                clearUserSearch.style.display =
+                    userSearch.value.trim() !== '' ? 'block' : 'none';
+            }
 
-userSearch.addEventListener('input', updateClearButton);
+            userSearch.addEventListener('input', updateClearButton);
 
-clearUserSearch.addEventListener('click', function () {
+            clearUserSearch.addEventListener('click', function () {
 
-    userSearch.value = '';
+                userSearch.value = '';
 
-    updateClearButton();
+                updateClearButton();
 
-    // Trigger shared AJAX live search
-    userSearch.dispatchEvent(
-        new Event('input', { bubbles: true })
-    );
+                // Trigger shared AJAX live search
+                userSearch.dispatchEvent(
+                    new Event('input', { bubbles: true })
+                );
 
-    userSearch.focus();
-});
+                userSearch.focus();
+            });
             const userModal = document.getElementById('userModal');
             const userForm = document.getElementById('userForm');
 

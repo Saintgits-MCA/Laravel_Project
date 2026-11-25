@@ -1,4 +1,12 @@
 
+<head>
+<script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
+<link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
+<link href="{{ asset('css/nav.css') }}" rel="stylesheet">
+<link href="{{ asset('css/main.css') }}" rel="stylesheet">
+<link href="{{ asset('css/bootstrap-icons.min.css') }}" rel="stylesheet">
+<link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
+</head>
 <nav class="navbar navbar-expand-lg custom-navbar">
     <div class="container">
 
@@ -38,7 +46,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-    <a class="nav-link {{ request()->routeIs('students.*','students') ? 'active' : '' }}"
+    <a class="nav-link {{ request()->routeIs('students.*', 'students') ? 'active' : '' }}"
        href="{{ route('students') }}">
         Students
     </a>

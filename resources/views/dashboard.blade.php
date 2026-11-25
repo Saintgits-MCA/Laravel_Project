@@ -8,12 +8,6 @@
 
     <title>Dashboard | Element</title>
 
-    <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/nav.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/main.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/bootstrap-icons.min.css') }}" rel="stylesheet">
-    <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
-
     <style>
         body {
             background: #f7f7fb;
@@ -90,6 +84,38 @@
             background: #bb2d3b;
             color: white;
         }
+        /* Keep navbar above all dashboard content */
+.custom-navbar {
+    position: relative !important;
+    z-index: 9999 !important;
+    overflow: visible !important;
+}
+
+/* Allow dropdown to display above dashboard sections */
+.custom-navbar .navbar-collapse {
+    overflow: visible !important;
+}
+
+.custom-navbar .dropdown {
+    position: relative;
+}
+
+.custom-navbar .dropdown-menu {
+    position: absolute;
+    z-index: 10000 !important;
+}
+
+/* Keep dashboard content below navbar */
+.dashboard-wrapper {
+    position: relative;
+    z-index: 1;
+}
+
+/* Prevent dashboard cards from covering navbar dropdown */
+.dashboard-card {
+    position: relative;
+    z-index: 0;
+}
     </style>
 </head>
 
@@ -193,7 +219,16 @@
 
     <x-footer />
 
-    <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const dropdownButton = document.getElementById('userDropdown');
 
+        if (dropdownButton && window.bootstrap) {
+            bootstrap.Dropdown.getOrCreateInstance(dropdownButton);
+        } else {
+            console.error('Bootstrap JavaScript or userDropdown button not found.');
+        }
+    });
+</script>
 </body>
 </html>

@@ -126,18 +126,6 @@
                                     autocomplete="off"
                                     data-search-input
                                 >
-
-                                <button
-                                    type="button"
-                                    class="btn btn-outline-secondary"
-                                    id="clearSchoolSearch"
-                                    aria-label="Clear search"
-                                    style="{{ request('search') ? '' : 'display:none;' }}">
-
-                                    <i class="bi bi-x-lg"></i>
-
-                                </button>
-
                             </div>
                         </form>
 
@@ -607,10 +595,6 @@
 <x-success-modal />
 
 <x-footer />
-
-
-<!-- SCRIPTS -->
-<script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
 
 {{-- SHARED LIVE SEARCH AND PAGINATION --}}
 <script src="{{ asset('js/live-search.js') }}"></script>

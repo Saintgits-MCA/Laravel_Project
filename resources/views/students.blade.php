@@ -428,10 +428,6 @@
 
     <x-footer />
 
-
-    {{-- JavaScript --}}
-    <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
-
     {{-- Shared live search --}}
     <script src="{{ asset('js/live-search.js') }}"></script>
 
