@@ -15,7 +15,17 @@
     <link href="{{ asset('css/bootstrap-icons.min.css') }}" rel="stylesheet">
 
 </head>
+<style>
+    .custom-pagination .page-item.active .page-link {
+        color: #fff;
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
 
+    .custom-pagination .page-item {
+        color: #dc3545;
+    }
+</style>
 <body>
 
     <x-navbar />
@@ -241,64 +251,10 @@
                         </table>
 
                     </div>
+<div data-search-pagination class="custom-pagination">
+    {{ $students->links('pagination::bootstrap-5') }}
+</div>
 
-                    {{-- Pagination --}}
-                    <div data-search-pagination>
-
-                        <div class="pagination-wrapper">
-
-                            {{-- Records information --}}
-                            <div class="pagination-info">
-
-                                Showing
-                                <strong>{{ $students->firstItem() ?? 0 }}</strong>
-                                to
-                                <strong>{{ $students->lastItem() ?? 0 }}</strong>
-                                of
-                                <strong>{{ $students->total() }}</strong>
-                                students
-
-                            </div>
-
-                            {{-- Page navigation --}}
-                            <div class="student-pagination">
-
-                                {{-- Previous --}}
-                                <a href="{{ $students->previousPageUrl() ?? '#' }}"
-                                    class="student-page-link {{ $students->onFirstPage() ? 'disabled' : '' }}"
-                                    aria-label="Previous page">
-
-                                    <i class="bi bi-chevron-left"></i>
-                                </a>
-
-                                {{-- Page numbers --}}
-                                @if($students->lastPage() > 0)
-
-                                    @foreach($students->getUrlRange(1, $students->lastPage()) as $page => $url)
-
-                                        <a href="{{ $url }}"
-                                            class="student-page-link {{ $students->currentPage() == $page ? 'active' : '' }}"
-                                            @if($students->currentPage() == $page) aria-current="page" @endif>
-
-                                            {{ $page }}
-
-                                        </a>
-
-                                    @endforeach
-
-                                @endif
-
-                                {{-- Next --}}
-                                <a href="{{ $students->nextPageUrl() ?? '#' }}"
-                                    class="student-page-link {{ !$students->hasMorePages() ? 'disabled' : '' }}"
-                                    aria-label="Next page">
-
-                                    <i class="bi bi-chevron-right"></i>
-                                </a>
-
-                            </div>
-
-                        </div>
 
                     </div>
 

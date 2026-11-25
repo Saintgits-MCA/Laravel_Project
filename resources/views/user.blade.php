@@ -14,7 +14,16 @@
     <link href="{{ asset('css/main.css') }}" rel="stylesheet">
     <link href="{{ asset('css/bootstrap-icons.min.css') }}" rel="stylesheet">
 </head>
-
+<style>
+    .custom-pagination .page-item.active .page-link {
+    color: #fff;
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+.custom-pagination .page-item{
+color: #dc3545;
+}
+</style>
 <body>
 
     <x-navbar />
@@ -161,61 +170,9 @@
 
                     </div>
 
-                    {{-- Custom Pagination --}}
-                    @if($users->total() >= 0)
-
-                        <div class="pagination-wrapper d-flex justify-content-between align-items-center flex-wrap gap-3" data-search-pagination>
-
-                            <div class="pagination-info">
-
-                                Showing
-                                <strong>{{ $users->firstItem() ?? 0 }}</strong>
-                                to
-                                <strong>{{ $users->lastItem() ?? 0 }}</strong>
-                                of
-                                <strong>{{ $users->total() }}</strong>
-                                users
-
-                            </div>
-
-                            <div class="user-pagination">
-
-                                {{-- Previous button --}}
-                                <a href="{{ $users->previousPageUrl() ?? '#' }}"
-                                   class="user-page-link {{ $users->onFirstPage() ? 'disabled' : '' }}"
-                                   aria-label="Previous page">
-
-                                    <i class="bi bi-chevron-left"></i>
-
-                                </a>
-
-                                {{-- Page numbers --}}
-                                @foreach($users->getUrlRange(1, $users->lastPage()) as $page => $url)
-
-                                    <a href="{{ $url }}"
-                                       class="user-page-link {{ $users->currentPage() == $page ? 'active' : '' }}"
-                                       @if($users->currentPage() == $page) aria-current="page" @endif>
-
-                                        {{ $page }}
-
-                                    </a>
-
-                                @endforeach
-
-                                {{-- Next button --}}
-                                <a href="{{ $users->nextPageUrl() ?? '#' }}"
-                                   class="user-page-link {{ $users->hasMorePages() ? '' : 'disabled' }}"
-                                   aria-label="Next page">
-
-                                    <i class="bi bi-chevron-right"></i>
-
-                                </a>
-
-                            </div>
-
-                        </div>
-
-                    @endif
+                    <div data-search-pagination class="custom-pagination">
+                        {{ $users->links('pagination::bootstrap-5') }}
+                    </div>
 
                 </div>
             </div>
