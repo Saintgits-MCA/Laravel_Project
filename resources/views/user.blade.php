@@ -25,7 +25,7 @@ color: #dc3545;
 
     <section class="hero-section">
 
-        <div class="container-fluid pt-1 pb-5 users-container">
+        <div class="container-fluid pt-3 pb-5 users-container">
 
             {{-- Page heading --}}
             <div class="text-center mb-4">
@@ -182,7 +182,7 @@ color: #dc3545;
          aria-labelledby="userModalLabel"
          aria-hidden="true">
 
-        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
 
             <div class="modal-content">
 

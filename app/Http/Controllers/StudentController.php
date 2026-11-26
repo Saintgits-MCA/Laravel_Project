@@ -12,16 +12,19 @@ class StudentController extends Controller
     // Display registration form and student list
     public function index(Request $request, SearchService $searchService)
     {
+        $status = in_array($request->status, ['Active', 'Inactive'], true)
+            ? $request->status
+            : null;
         // Common search using SearchService
         $students = $searchService->search(
             model: Student::class,
             columns: ['name', 'email', 'phone', 'course'],
             search: $request->search,
             perPage: 5,
-            direction: 'asc'
+            direction: 'asc',
+            status: $status,
         );
 
-    
 
         // Load a student into the form when Edit is clicked
         $editingStudent = $request->query('edit')

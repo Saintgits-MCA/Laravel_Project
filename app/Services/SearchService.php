@@ -13,7 +13,8 @@ class SearchService
         ?string $search = null,
         int $perPage = 5,
         string $orderBy = 'id',
-        string $direction = 'desc'
+        string $direction = 'desc',
+        ?string $status = null
     ) {
         $query = $model::query();
         if (!empty($search)) {
@@ -27,6 +28,10 @@ class SearchService
                 }
             });
         }
+        if (in_array($status, ['Active', 'Inactive'], true)) {
+            $query->where('status', $status);
+        }
+
         return $query
             ->orderBy($orderBy, $direction)
             ->paginate($perPage)
