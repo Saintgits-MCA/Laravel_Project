@@ -1,6 +1,6 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,17 +8,20 @@
     <title>Element | Users</title>
 
     <link rel="icon" href="{{ asset('images/favicon.png') }}">
+    @vite('resources/js/app.js')
 </head>
 <style>
     .custom-pagination .page-item.active .page-link {
-    color: #fff;
-    background-color: #dc3545;
-    border-color: #dc3545;
-}
-.custom-pagination .page-item{
-color: #dc3545;
-}
+        color: #fff;
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+    .custom-pagination .page-item {
+        color: #dc3545;
+    }
 </style>
+
 <body>
 
     <x-navbar />
@@ -39,136 +42,122 @@ color: #dc3545;
             {{-- Users table card --}}
             <div class="card user-list-card">
 
-       <div class="card-body py-3 p-md-4" data-live-search data-url="{{ route('user_index') }}">
-                    {{-- Table heading and Add button --}}
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+                <div class="card-body py-3 p-md-4" data-url="{{ route('user_index') }}">
+                    <turbo-frame id="users-list">
+                        {{-- Table heading and Add button --}}
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
 
-                        <div>
-                            <h4 class="user-heading mb-1">
-                                <i class="bi bi-people-fill me-2"></i>
-                                Registered Users
-                            </h4>
+                            <div>
+                                <h4 class="user-heading mb-1">
+                                    <i class="bi bi-people-fill me-2"></i>
+                                    Registered Users
+                                </h4>
 
-                            <small class="text-muted">
-                                View and manage registered users
-                            </small>
-                        </div>
+                                <small class="text-muted">
+                                    View and manage registered users
+                                </small>
+                            </div>
 
-                        <div class="d-flex align-items-center gap-3">
+                            <div class="d-flex align-items-center gap-3">
 
-                            <span class="badge bg-danger rounded-pill px-3 py-2" data-search-total>
-                                Total: {{ $users->total() }}
-                            </span>
-                            {{-- Live Search with Clear Button --}}
-                            <form action="{{ route('user_index') }}" class="mt-2" method="GET" data-search-form class="mb-4">
-                            
-                                <div class="input-group" style="max-width: 350px;">
-                            
-                                    <span class="input-group-text bg-white">
-                                        <i class="bi bi-search"></i>
-                                    </span>
-                            
-                                    <input type="text" name="search" id="userSearch" class="form-control" placeholder="Search users..."
-                                        value="{{ request('search') }}" data-search-input autocomplete="off">
-                            
-                                    <button type="button" class="btn btn-outline-secondary" id="clearUserSearch" aria-label="Clear search"
-                                        style="{{ request('search') ? '' : 'display: none;' }}">
-                            
-                                        <i class="bi bi-x-lg"></i>
-                            
-                                    </button>
-                            
-                                </div>
-                            
-                            </form>
-                           <button type="button"
-                                    class="btn btn-danger px-3 py-2 fw-semibold"
-                                    id="addUserBtn"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#userModal">
+                                <span class="badge bg-danger rounded-pill px-3 py-2" data-search-total>
+                                    Total: {{ $users->total() }}
+                                </span>
+                                {{-- Live Search with Clear Button --}}
+                                <form action="{{ route('user_index') }}" method="GET" id="userSearchForm"
+                                    data-turbo-frame="users-list" class="mt-2 mb-4">
 
-                                <i class="bi bi-person-plus me-2"></i>
-                                Add New User
-                            </button>
+                                    <div class="input-group" style="max-width: 350px;">
+
+                                        <span class="input-group-text bg-white">
+                                            <i class="bi bi-search"></i>
+                                        </span>
+
+                                        <input type="search" name="search" id="userSearch" class="form-control"
+                                            placeholder="Search users..." value="{{ request('search') }}"
+                                            autocomplete="off">
+
+                                    </div>
+                                </form>
+                                <button type="button" class="btn btn-danger px-3 py-2 fw-semibold" id="addUserBtn"
+                                    data-bs-toggle="modal" data-bs-target="#userModal">
+
+                                    <i class="bi bi-person-plus me-2"></i>
+                                    Add New User
+                                </button>
+
+                            </div>
 
                         </div>
 
-                    </div>
+                        {{-- Users table --}}
+                        <div class="table-responsive">
 
-                    {{-- Users table --}}
-                    <div class="table-responsive">
+                            <table class="table table-hover user-table w-100">
 
-                        <table class="table table-hover user-table w-100">
-
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Registered Date</th>
-                                    @auth<th>Actions</th>@endauth
-                                </tr>
-                            </thead>
-
-                            <tbody data-search-results>
-
-                                @forelse($users as $user)
-
+                                <thead>
                                     <tr>
-                                        <td>{{ $user->id }}</td>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Registered Date</th>
+                                        @auth<th>Actions</th>@endauth
+                                    </tr>
+                                </thead>
 
-                                        <td class="fw-semibold">
-                                            {{ $user->name }}
-                                        </td>
+                                <tbody>
 
-                                        <td>{{ $user->email }}</td>
+                                    @forelse($users as $user)
 
-                                        <td>
-                                            {{ $user->created_at?->format('d M Y') ?? 'N/A' }}
-                                        </td>
+                                        <tr>
+                                            <td>{{ $user->id }}</td>
 
-                                        @auth<td>
-                                            <button type="button"
-                                                    class="btn btn-sm btn-outline-primary editUserBtn"
-                                                    title="Edit user"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#userModal"
-                                                    data-id="{{ $user->id }}"
-                                                    data-name="{{ $user->name }}"
-                                                    data-email="{{ $user->email }}"
-                                                    data-password="{{$user->password}}"
+                                            <td class="fw-semibold">
+                                                {{ $user->name }}
+                                            </td>
+
+                                            <td>{{ $user->email }}</td>
+
+                                            <td>
+                                                {{ $user->created_at?->format('d M Y') ?? 'N/A' }}
+                                            </td>
+
+                                            @auth<td>
+                                                <button type="button" class="btn btn-sm btn-outline-primary editUserBtn"
+                                                    title="Edit user" data-bs-toggle="modal" data-bs-target="#userModal"
+                                                    data-id="{{ $user->id }}" data-name="{{ $user->name }}"
+                                                    data-email="{{ $user->email }}" data-password="{{$user->password}}"
                                                     data-url="{{ route('users.update', $user->id) }}">
 
-                                                <i class="bi bi-pencil-fill me-1"></i>
-                                                
-                                            </button>
-                                        </td>@endauth
-                                    </tr>
+                                                    <i class="bi bi-pencil-fill me-1"></i>
 
-                                @empty
+                                                </button>
+                                            </td>@endauth
+                                        </tr>
 
-                                    <tr>
-                                        <td colspan="5"
-                                            class="text-center text-muted py-4">
+                                    @empty
 
-                                            <i class="bi bi-inbox fs-2 d-block mb-2"></i>
-                                            No users found in the database.
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted py-4">
 
-                                        </td>
-                                    </tr>
+                                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                                No users found in the database.
 
-                                @endforelse
+                                            </td>
+                                        </tr>
 
-                            </tbody>
+                                    @endforelse
 
-                        </table>
+                                </tbody>
 
-                    </div>
+                            </table>
 
-                    <div data-search-pagination class="custom-pagination">
-                        {{ $users->links('pagination::bootstrap-5') }}
-                    </div>
+                        </div>
 
+                        <div class="custom-pagination">
+                            {{ $users->links('pagination::bootstrap-5') }}
+                        </div>
+                    </turbo-frame>
                 </div>
             </div>
 
@@ -176,11 +165,7 @@ color: #dc3545;
     </section>
 
     {{-- Add / Edit User Modal --}}
-    <div class="modal fade user-modal"
-         id="userModal"
-         tabindex="-1"
-         aria-labelledby="userModalLabel"
-         aria-hidden="true">
+    <div class="modal fade user-modal" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
 
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
 
@@ -189,24 +174,19 @@ color: #dc3545;
                 <div class="modal-header">
 
                     <div>
-                        <h5 class="modal-title user-heading"
-                            id="userModalLabel">
+                        <h5 class="modal-title user-heading" id="userModalLabel">
 
                             <i class="bi bi-person-plus me-2"></i>
                             Create User
 
                         </h5>
 
-                        <small class="text-muted"
-                               id="userModalDescription">
+                        <small class="text-muted" id="userModalDescription">
                             Enter the details to register a new user.
                         </small>
                     </div>
 
-                    <button type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal"
-                            aria-label="Close">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
                     </button>
 
                 </div>
@@ -229,39 +209,27 @@ color: #dc3545;
                     @endif
 
                     {{-- Add / Edit Form --}}
-                    <form id="userForm"
-                          action="{{ old('_editing_id')
+                    <form id="userForm" action="{{ old('_editing_id')
     ? route('users.update', old('_editing_id'))
-    : route('users.store') }}"
-                          method="POST">
+    : route('users.store') }}" method="POST">
 
                         @csrf
 
-                        <input type="hidden"
-                               name="_editing_id"
-                               id="editing_id"
-                               value="{{ old('_editing_id') }}">
+                        <input type="hidden" name="_editing_id" id="editing_id" value="{{ old('_editing_id') }}">
 
-                        <input type="hidden"
-                               name="_method"
-                               id="formMethod"
-                               value="{{ old('_editing_id') ? 'PUT' : 'POST' }}">
+                        <input type="hidden" name="_method" id="formMethod"
+                            value="{{ old('_editing_id') ? 'PUT' : 'POST' }}">
 
                         {{-- Name --}}
                         <div class="mb-3">
 
-                            <label for="name"
-                                   class="form-label fw-semibold">
+                            <label for="name" class="form-label fw-semibold">
                                 Full Name
                             </label>
 
-                            <input type="text"
-                                   name="name"
-                                   id="name"
-                                   class="form-control @error('name') is-invalid @enderror"
-                                   placeholder="Enter full name"
-                                   value="{{ old('name') }}"
-                                   required>
+                            <input type="text" name="name" id="name"
+                                class="form-control @error('name') is-invalid @enderror" placeholder="Enter full name"
+                                value="{{ old('name') }}" required>
 
                             @error('name')
                                 <div class="invalid-feedback">
@@ -274,18 +242,13 @@ color: #dc3545;
                         {{-- Email --}}
                         <div class="mb-3">
 
-                            <label for="email"
-                                   class="form-label fw-semibold">
+                            <label for="email" class="form-label fw-semibold">
                                 Email Address
                             </label>
 
-                            <input type="email"
-                                   name="email"
-                                   id="email"
-                                   class="form-control @error('email') is-invalid @enderror"
-                                   placeholder="example@email.com"
-                                   value="{{ old('email') }}"
-                                   required>
+                            <input type="email" name="email" id="email"
+                                class="form-control @error('email') is-invalid @enderror"
+                                placeholder="example@email.com" value="{{ old('email') }}" required>
 
                             @error('email')
                                 <div class="invalid-feedback">
@@ -298,28 +261,22 @@ color: #dc3545;
                         {{-- Password --}}
                         <div class="mb-3">
 
-                            <label for="password"
-                                   class="form-label fw-semibold"
-                                   id="passwordLabel" value="{{ old('password') }}">
+                            <label for="password" class="form-label fw-semibold" id="passwordLabel"
+                                value="{{ old('password') }}">
                                 Password
                             </label>
 
                             <div class="input-group">
 
-                                <input type="password"
-                                       name="password"
-                                       id="password"
-                                       class="form-control @error('password') is-invalid @enderror"
-                                       placeholder="Minimum 4 characters"
-                                       autocomplete="new-password" value="{{ old('password') }}">
+                                <input type="password" name="password" id="password"
+                                    class="form-control @error('password') is-invalid @enderror"
+                                    placeholder="Minimum 4 characters" autocomplete="new-password"
+                                    value="{{ old('password') }}">
 
-                                <button class="btn password-toggle"
-                                        type="button"
-                                        onclick="togglePassword('password', 'passwordEye')"
-                                        aria-label="Show password">
+                                <button class="btn password-toggle" type="button"
+                                    onclick="togglePassword('password', 'passwordEye')" aria-label="Show password">
 
-                                    <i class="bi bi-eye"
-                                       id="passwordEye"></i>
+                                    <i class="bi bi-eye" id="passwordEye"></i>
 
                                 </button>
 
@@ -340,27 +297,20 @@ color: #dc3545;
                         {{-- Confirm Password --}}
                         <div class="mb-4">
 
-                            <label for="password_confirmation"
-                                   class="form-label fw-semibold">
+                            <label for="password_confirmation" class="form-label fw-semibold">
                                 Confirm Password
                             </label>
 
                             <div class="input-group">
 
-                                <input type="password"
-                                       name="password_confirmation"
-                                       id="password_confirmation"
-                                       class="form-control"
-                                       placeholder="Re-enter password"
-                                       autocomplete="new-password">
+                                <input type="password" name="password_confirmation" id="password_confirmation"
+                                    class="form-control" placeholder="Re-enter password" autocomplete="new-password">
 
-                                <button class="btn password-toggle"
-                                        type="button"
-                                        onclick="togglePassword('password_confirmation', 'confirmPasswordEye')"
-                                        aria-label="Show confirm password">
+                                <button class="btn password-toggle" type="button"
+                                    onclick="togglePassword('password_confirmation', 'confirmPasswordEye')"
+                                    aria-label="Show confirm password">
 
-                                    <i class="bi bi-eye"
-                                       id="confirmPasswordEye"></i>
+                                    <i class="bi bi-eye" id="confirmPasswordEye"></i>
 
                                 </button>
 
@@ -371,18 +321,14 @@ color: #dc3545;
                         {{-- Submit and Cancel --}}
                         <div class="d-flex gap-2">
 
-                            <button type="submit"
-                                    class="btn btn-danger px-4 py-2 fw-semibold"
-                                    id="saveUserBtn">
+                            <button type="submit" class="btn btn-danger px-4 py-2 fw-semibold" id="saveUserBtn">
 
                                 <i class="bi bi-person-plus me-2"></i>
                                 Register User
 
                             </button>
 
-                            <button type="button"
-                                    class="btn btn-outline-secondary px-4 py-2"
-                                    data-bs-dismiss="modal">
+                            <button type="button" class="btn btn-outline-secondary px-4 py-2" data-bs-dismiss="modal">
 
                                 Cancel
 
@@ -400,9 +346,8 @@ color: #dc3545;
 
     <x-success-modal />
 
-    <x-footer/>
+    <x-footer />
 
-    <script src="{{ asset('js/live-search.js') }}"></script>
 
     <script>
         // Password Show / Hide
@@ -504,7 +449,7 @@ color: #dc3545;
 
                 });
 
-           userModal.addEventListener('show.bs.modal', function (event) {
+            userModal.addEventListener('show.bs.modal', function (event) {
 
                 const button = event.relatedTarget;
 
@@ -586,21 +531,22 @@ color: #dc3545;
 
             @endif
 
-            // Automatically show success modal
-            @if(session('success'))
+                // Automatically show success modal
+                @if(session('success'))
 
-                const successModalElement =
-                    document.getElementById('successModal');
+                    const successModalElement =
+                        document.getElementById('successModal');
 
-                const successModal =
-                    new bootstrap.Modal(successModalElement);
+                    const successModal =
+                        new bootstrap.Modal(successModalElement);
 
-                successModal.show();
+                    successModal.show();
 
-            @endif
+                @endif
 
         });
     </script>
 
 </body>
+
 </html>

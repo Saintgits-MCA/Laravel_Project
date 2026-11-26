@@ -21,14 +21,7 @@ class StudentController extends Controller
             direction: 'asc'
         );
 
-        // Filter by student status
-        if (in_array($request->status, ['Active', 'Inactive'])) {
-            $students = Student::whereIn('id', $students->pluck('id'))
-                ->where('status', $request->status)
-                ->latest()
-                ->paginate(5)
-                ->withQueryString();
-        }
+    
 
         // Load a student into the form when Edit is clicked
         $editingStudent = $request->query('edit')

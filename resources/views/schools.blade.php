@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -11,7 +12,8 @@
     <link href="{{ asset('css/nav.css') }}" rel="stylesheet">
     <link href="{{ asset('css/main.css') }}" rel="stylesheet">
     <link href="{{ asset('css/bootstrap-icons.min.css') }}" rel="stylesheet">
-<style>
+
+    <style>
         /* Existing pagination styling */
         .custom-pagination .page-item.active .page-link {
             color: #fff;
@@ -61,6 +63,7 @@
             flex-shrink: 0;
         }
     </style>
+    @vite('resources/js/app.js')
 </head>
 
 <body>
@@ -78,230 +81,228 @@
 
         <div class="card school-list-card">
 
-            {{-- LIVE SEARCH MAIN WRAPPER --}}
-            <div class="card-body p-3 p-md-4"
-                 data-live-search
-                 data-url="{{ route('schools.index') }}">
+            <div class="card-body p-3 p-md-4">
 
-                <!-- HEADER + SEARCH -->
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+                {{-- TURBO FRAME: HEADER, SEARCH, TABLE AND PAGINATION --}}
+                <turbo-frame id="schools-list">
 
-                    <div>
-                        <h4 class="school-heading mb-1">
-                            <i class="bi bi-building-fill me-2"></i>
-                            Registered Schools
-                        </h4>
+                    <!-- HEADER + SEARCH -->
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
 
-                        <small class="text-muted">
-                            Manage your school records
-                        </small>
+                        <div>
+                            <h4 class="school-heading mb-1">
+                                <i class="bi bi-building-fill me-2"></i>
+                                Registered Schools
+                            </h4>
+
+                            <small class="text-muted">
+                                Manage your school records
+                            </small>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-3 flex-wrap">
+
+                            {{-- TOTAL COUNT --}}
+                            <span class="badge bg-danger rounded-pill px-3 py-2">
+                                Total: {{ $schools->total() }}
+                            </span>
+
+                            {{-- TURBO SEARCH FORM --}}
+                            <form action="{{ route('schools.index') }}"
+                                  method="GET"
+                                  data-turbo-frame="schools-list">
+
+                                <div class="input-group" style="width:250px;">
+
+                                    <span class="input-group-text bg-white">
+                                        <i class="bi bi-search"></i>
+                                    </span>
+
+                                    <input
+                                        type="search"
+                                        name="search"
+                                        id="schoolSearch"
+                                        class="form-control"
+                                        placeholder="Search schools..."
+                                        value="{{ request('search') }}"
+                                        autocomplete="off"
+                                    >
+                                </div>
+                            </form>
+
+                            @auth
+                                <button
+                                    type="button"
+                                    class="btn btn-danger px-3 py-2 fw-semibold"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#schoolModal"
+                                    id="addSchoolBtn">
+
+                                    <i class="bi bi-plus-circle me-2"></i>
+                                    Add New School
+
+                                </button>
+                            @endauth
+
+                        </div>
                     </div>
 
-                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <!-- TABLE -->
+                    <div id="schoolTableArea">
 
-                        {{-- TOTAL COUNT --}}
-                        <span class="badge bg-danger rounded-pill px-3 py-2"
-                              data-search-total>
-                            Total: {{ $schools->total() }}
-                        </span>
+                        <div class="table-responsive">
 
-                        {{-- LIVE SEARCH FORM --}}
-                        <form action="{{ route('schools.index') }}"
-                              method="GET"
-                              data-search-form>
+                            <table class="table table-hover school-table">
 
-                            <div class="input-group" style="width:250px;">
-
-                                <span class="input-group-text bg-white">
-                                    <i class="bi bi-search"></i>
-                                </span>
-
-                                <input
-                                    type="search"
-                                    name="search"
-                                    id="schoolSearch"
-                                    class="form-control"
-                                    placeholder="Search schools..."
-                                    value="{{ request('search') }}"
-                                    autocomplete="off"
-                                    data-search-input
-                                >
-                            </div>
-                        </form>
-
-                        @auth
-                            <button
-                                type="button"
-                                class="btn btn-danger px-3 py-2 fw-semibold"
-                                data-bs-toggle="modal"
-                                data-bs-target="#schoolModal"
-                                id="addSchoolBtn">
-
-                                <i class="bi bi-plus-circle me-2"></i>
-                                Add New School
-
-                            </button>
-                        @endauth
-
-                    </div>
-                </div>
-
-
-                <!-- TABLE -->
-                <div id="schoolTableArea">
-
-                    <div class="table-responsive">
-
-                        <table class="table table-hover school-table">
-
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>School Name</th>
-                                    <th>Code</th>
-                                    <th>Email</th>
-                                    <th>Ph. No.</th>
-                                    <th>City/State</th>
-                                    <th>Address</th>
-                                    <th>Status</th>
-
-                                    @auth
-                                        <th>Actions</th>
-                                    @endauth
-                                </tr>
-                            </thead>
-
-                            {{-- AJAX TABLE RESULTS --}}
-                            <tbody data-search-results>
-
-                                @forelse($schools as $index => $school)
-
+                                <thead>
                                     <tr>
-
-                                        <td>
-                                            {{ $schools->firstItem() + $index }}
-                                        </td>
-
-                                        <td class="fw-semibold">
-                                            {{ $school->school_name }}
-                                        </td>
-
-                                        <td>
-                                            {{ $school->school_code }}
-                                        </td>
-
-                                        <td>
-                                            {{ $school->email ?? 'N/A' }}
-                                        </td>
-
-                                        <td>
-                                            {{ $school->phone ?? 'N/A' }}
-                                        </td>
-
-                                        <td>
-                                            {{ $school->city ?? 'N/A' }}
-                                            {{ $school->state ? ', ' . $school->state : '' }}
-                                            {{ $school->pincode ? ', ' . $school->pincode : '' }}
-                                        </td>
-
-                                        <td>
-                                            {{ $school->address ?? '-' }}
-                                        </td>
-
-                                        <td>
-                                            @if(strtolower($school->status) === 'active')
-                                                <span class="badge bg-success">
-                                                    Active
-                                                </span>
-                                            @else
-                                                <span class="badge bg-secondary">
-                                                    {{ $school->status }}
-                                                </span>
-                                            @endif
-                                        </td>
+                                        <th>#</th>
+                                        <th>School Name</th>
+                                        <th>Code</th>
+                                        <th>Email</th>
+                                        <th>Ph. No.</th>
+                                        <th>City/State</th>
+                                        <th>Address</th>
+                                        <th>Status</th>
 
                                         @auth
+                                            <th>Actions</th>
+                                        @endauth
+                                    </tr>
+                                </thead>
+
+                                {{-- TURBO TABLE RESULTS --}}
+                                <tbody>
+
+                                    @forelse($schools as $index => $school)
+
+                                        <tr>
+
                                             <td>
+                                                {{ $schools->firstItem() + $index }}
+                                            </td>
 
-                                                {{-- FIXED ACTION BUTTONS --}}
-                                                <div class="school-actions">
+                                            <td class="fw-semibold">
+                                                {{ $school->school_name }}
+                                            </td>
 
-                                                    {{-- EDIT --}}
-                                                    <button
-                                                        type="button"
-                                                        class="btn btn-sm btn-outline-primary editSchoolBtn"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#schoolModal"
-                                                        data-url="{{ route('schools.update', $school->id) }}"
-                                                        data-id="{{ $school->id }}"
-                                                        data-name="{{ $school->school_name }}"
-                                                        data-code="{{ $school->school_code }}"
-                                                        data-email="{{ $school->email }}"
-                                                        data-phone="{{ $school->phone }}"
-                                                        data-address="{{ $school->address }}"
-                                                        data-city="{{ $school->city }}"
-                                                        data-state="{{ $school->state }}"
-                                                        data-pincode="{{ $school->pincode }}"
-                                                        data-status="{{ $school->status }}">
+                                            <td>
+                                                {{ $school->school_code }}
+                                            </td>
 
-                                                        <i class="bi bi-pencil-fill"></i>
+                                            <td>
+                                                {{ $school->email ?? 'N/A' }}
+                                            </td>
 
-                                                    </button>
+                                            <td>
+                                                {{ $school->phone ?? 'N/A' }}
+                                            </td>
 
-                                                    {{-- DELETE --}}
-                                                    <form
-                                                        action="{{ route('schools.destroy', $school->id) }}"
-                                                        method="POST"
-                                                        onsubmit="return confirm('Delete this school?')">
+                                            <td>
+                                                {{ $school->city ?? 'N/A' }}
+                                                {{ $school->state ? ', ' . $school->state : '' }}
+                                                {{ $school->pincode ? ', ' . $school->pincode : '' }}
+                                            </td>
 
-                                                        @csrf
-                                                        @method('DELETE')
+                                            <td>
+                                                {{ $school->address ?? '-' }}
+                                            </td>
 
+                                            <td>
+                                                @if(strtolower($school->status) === 'active')
+                                                    <span class="badge bg-success">
+                                                        Active
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-secondary">
+                                                        {{ $school->status }}
+                                                    </span>
+                                                @endif
+                                            </td>
+
+                                            @auth
+                                                <td>
+
+                                                    <div class="school-actions">
+
+                                                        {{-- EDIT --}}
                                                         <button
-                                                            type="submit"
-                                                            class="btn btn-sm btn-outline-danger">
+                                                            type="button"
+                                                            class="btn btn-sm btn-outline-primary editSchoolBtn"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#schoolModal"
+                                                            data-url="{{ route('schools.update', $school->id) }}"
+                                                            data-id="{{ $school->id }}"
+                                                            data-name="{{ $school->school_name }}"
+                                                            data-code="{{ $school->school_code }}"
+                                                            data-email="{{ $school->email }}"
+                                                            data-phone="{{ $school->phone }}"
+                                                            data-address="{{ $school->address }}"
+                                                            data-city="{{ $school->city }}"
+                                                            data-state="{{ $school->state }}"
+                                                            data-pincode="{{ $school->pincode }}"
+                                                            data-status="{{ $school->status }}">
 
-                                                            <i class="bi bi-trash-fill"></i>
+                                                            <i class="bi bi-pencil-fill"></i>
 
                                                         </button>
 
-                                                    </form>
+                                                        {{-- DELETE --}}
+                                                        <form
+                                                            action="{{ route('schools.destroy', $school->id) }}"
+                                                            method="POST"
+                                                            onsubmit="return confirm('Delete this school?')">
 
-                                                </div>
+                                                            @csrf
+                                                            @method('DELETE')
+
+                                                            <button
+                                                                type="submit"
+                                                                class="btn btn-sm btn-outline-danger">
+
+                                                                <i class="bi bi-trash-fill"></i>
+
+                                                            </button>
+
+                                                        </form>
+
+                                                    </div>
+
+                                                </td>
+                                            @endauth
+
+                                        </tr>
+
+                                    @empty
+
+                                        <tr>
+                                            <td
+                                                colspan="@auth 9 @else 8 @endauth"
+                                                class="text-center text-muted py-5">
+
+                                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+
+                                                No schools found.
 
                                             </td>
-                                        @endauth
+                                        </tr>
 
-                                    </tr>
+                                    @endforelse
 
-                                @empty
+                                </tbody>
 
-                                    <tr>
-                                        <td
-                                            colspan="@auth 9 @else 8 @endauth"
-                                            class="text-center text-muted py-5">
+                            </table>
 
-                                            <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                        </div>
 
-                                            No schools found.
-
-                                        </td>
-                                    </tr>
-
-                                @endforelse
-
-                            </tbody>
-
-                        </table>
+                        {{-- TURBO PAGINATION --}}
+                        <div class="custom-pagination mt-2">
+                            {{ $schools->links('pagination::bootstrap-5') }}
+                        </div>
 
                     </div>
 
-                    {{-- AJAX PAGINATION --}}
-                    <div data-search-pagination class="custom-pagination mt-2">
-                        {{ $schools->links('pagination::bootstrap-5') }}
-                    </div>
-
-                </div>
+                </turbo-frame>
 
             </div>
         </div>
@@ -368,7 +369,6 @@
 
                 @endif
 
-
                 <form
                     id="schoolForm"
                     action="{{ old('_editing_id') ? route('schools.update', old('_editing_id')) : route('schools.store') }}"
@@ -388,7 +388,6 @@
                         id="formMethod"
                         value="{{ old('_editing_id') ? 'PUT' : 'POST' }}">
 
-
                     <div class="row g-3">
 
                         <div class="col-md-8">
@@ -407,7 +406,6 @@
 
                         </div>
 
-
                         <div class="col-md-4">
 
                             <label class="form-label fw-semibold">
@@ -424,7 +422,6 @@
 
                         </div>
 
-
                         <div class="col-md-6">
 
                             <label class="form-label fw-semibold">
@@ -439,7 +436,6 @@
                                 value="{{ old('email') }}">
 
                         </div>
-
 
                         <div class="col-md-6">
 
@@ -459,7 +455,6 @@
 
                         </div>
 
-
                         <div class="col-md-6">
 
                             <label class="form-label fw-semibold">
@@ -475,7 +470,6 @@
                                 placeholder="Enter full address">{{ old('address') }}</textarea>
 
                         </div>
-
 
                         <div class="col-md-6">
 
@@ -505,7 +499,6 @@
 
                         </div>
 
-
                         <div class="col-md-4">
 
                             <label class="form-label fw-semibold">
@@ -521,7 +514,6 @@
 
                         </div>
 
-
                         <div class="col-md-4">
 
                             <label class="form-label fw-semibold">
@@ -536,7 +528,6 @@
                                 value="{{ old('state') }}">
 
                         </div>
-
 
                         <div class="col-md-4">
 
@@ -556,7 +547,6 @@
                         </div>
 
                     </div>
-
 
                     <div class="d-flex gap-2 mt-4">
 
@@ -596,14 +586,10 @@
 
 <x-footer />
 
-{{-- SHARED LIVE SEARCH AND PAGINATION --}}
-<script src="{{ asset('js/live-search.js') }}"></script>
 
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-
-  
 
     // MODAL ELEMENTS
     const schoolForm = document.getElementById('schoolForm');
@@ -616,39 +602,36 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const saveButton = document.getElementById('saveSchoolBtn');
 
-    const addSchoolBtn = document.getElementById('addSchoolBtn');
-
     const addSchoolUrl = @json(route('schools.store'));
 
-
-    // ADD SCHOOL
-    if (addSchoolBtn) {
-
-        addSchoolBtn.addEventListener('click', function () {
-
-            schoolForm.reset();
-
-            schoolForm.action = addSchoolUrl;
-
-            editingId.value = '';
-            formMethod.value = 'POST';
-
-            modalTitle.textContent = 'Add New School';
-
-            modalDescription.textContent =
-                'Enter the school details below.';
-
-            saveButton.innerHTML =
-                '<i class="bi bi-building-add me-2"></i> Save School';
-
-        });
-
-    }
-
-
-  
     const schoolModalElement = document.getElementById('schoolModal');
 
+    // ADD SCHOOL - DELEGATED EVENT
+    // Continues working when Turbo replaces the frame.
+    document.addEventListener('click', function (event) {
+
+        const button = event.target.closest('#addSchoolBtn');
+
+        if (!button) return;
+
+        schoolForm.reset();
+
+        schoolForm.action = addSchoolUrl;
+
+        editingId.value = '';
+        formMethod.value = 'POST';
+
+        modalTitle.textContent = 'Add New School';
+
+        modalDescription.textContent =
+            'Enter the school details below.';
+
+        saveButton.innerHTML =
+            '<i class="bi bi-building-add me-2"></i> Save School';
+
+    });
+
+    // EDIT SCHOOL MODAL
     schoolModalElement.addEventListener('show.bs.modal', function (event) {
 
         const button = event.relatedTarget;
@@ -689,7 +672,6 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('status').value =
             button.dataset.status || 'active';
 
-
         modalTitle.textContent = 'Update School';
 
         modalDescription.textContent =
@@ -699,41 +681,6 @@ document.addEventListener('DOMContentLoaded', function () {
             '<i class="bi bi-check-circle me-2"></i> Update School';
 
     });
-
-
-    // CLEAR SEARCH BUTTON
-    // Shared live-search.js handles the AJAX request.
-    const schoolSearch = document.getElementById('schoolSearch');
-
-    const clearSchoolSearch = document.getElementById('clearSchoolSearch');
-
-    if (schoolSearch && clearSchoolSearch) {
-
-        function updateClearButton() {
-
-            clearSchoolSearch.style.display =
-                schoolSearch.value.trim() !== '' ? 'block' : 'none';
-
-        }
-
-        schoolSearch.addEventListener('input', updateClearButton);
-
-        clearSchoolSearch.addEventListener('click', function () {
-
-            schoolSearch.value = '';
-
-            updateClearButton();
-
-            schoolSearch.dispatchEvent(
-                new Event('input', { bubbles: true })
-            );
-
-            schoolSearch.focus();
-
-        });
-
-    }
-
 
     // REOPEN MODAL ON VALIDATION FAILURE
     @if($errors->any())

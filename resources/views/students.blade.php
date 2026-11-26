@@ -14,18 +14,40 @@
     <link href="{{ asset('css/main.css') }}" rel="stylesheet">
     <link href="{{ asset('css/bootstrap-icons.min.css') }}" rel="stylesheet">
 
-</head>
-<style>
-    .custom-pagination .page-item.active .page-link {
-        color: #fff;
-        background-color: #dc3545;
-        border-color: #dc3545;
-    }
+@vite('resources/js/app.js')
 
-    .custom-pagination .page-item {
-        color: #dc3545;
-    }
-</style>
+    <style>
+        .custom-pagination .page-item.active .page-link {
+            color: #fff;
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .custom-pagination .page-item {
+            color: #dc3545;
+        }
+
+        .student-table {
+            min-width: 950px;
+        }
+
+        .student-table th:last-child,
+        .student-table td:last-child {
+            white-space: nowrap;
+        }
+
+        turbo-frame {
+            display: block;
+        }
+
+        #clearStudentSearch {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
+
+</head>
+
 <body>
 
     <x-navbar />
@@ -34,231 +56,268 @@
 
         <div class="container-fluid py-2 students-container">
 
-            {{-- Page heading --}}
+            {{-- PAGE HEADING --}}
             <div class="text-center mb-4">
                 <h2 class="fw-bold text-danger">Students</h2>
+
                 <p class="text-muted">
                     View and manage student records.
                 </p>
             </div>
 
-            {{-- Student list --}}
+            {{-- STUDENT LIST CARD --}}
             <div class="card student-list-card">
 
-                {{-- Live search wrapper --}}
-                <div class="card-body p-3 p-md-4" data-live-search data-url="{{ route('students') }}">
+                <div class="card-body p-3 p-md-4">
 
-                    {{-- Table heading and Add button --}}
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+                    {{-- TURBO FRAME START --}}
+                    <turbo-frame id="students-list">
 
-                        <div>
-                            <h4 class="student-heading mb-1">
-                                <i class="bi bi-person-badge me-2"></i>
-                                Registered Students
-                            </h4>
+                        {{-- TABLE HEADING AND ADD BUTTON --}}
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
 
-                            <small class="text-muted">
-                                Manage your student records
-                            </small>
-                        </div>
+                            <div>
+                                <h4 class="student-heading mb-1">
+                                    <i class="bi bi-person-badge me-2"></i>
+                                    Registered Students
+                                </h4>
 
-                        <div class="d-flex align-items-center gap-3">
+                                <small class="text-muted">
+                                    Manage your student records
+                                </small>
+                            </div>
 
-                            <span class="badge bg-danger rounded-pill px-3 py-2">
-                                Total:
-                                <span data-search-total>{{ $students->total() }}</span>
-                            </span>
+                            <div class="d-flex align-items-center gap-3 flex-wrap">
 
-                            @auth
-                                <button type="button" class="btn btn-danger px-3 py-2 fw-semibold" data-bs-toggle="modal"
-                                    data-bs-target="#studentModal" id="addStudentBtn">
-
-                                    <i class="bi bi-plus-circle me-2"></i>
-                                    Add New Student
-                                </button>
-                            @endauth
-
-                        </div>
-                    </div>
-
-                    {{-- Search and status filter --}}
-                    <form action="{{ route('students') }}" method="GET" class="row g-3 align-items-end mb-4"
-                        data-search-form>
-
-                        {{-- Search with Clear Button --}}
-                        <div class="col-md-5">
-
-                            <label for="studentSearch" class="form-label fw-semibold">
-                                Search Students
-                            </label>
-
-                            <div class="input-group">
-
-                                <span class="input-group-text bg-white">
-                                    <i class="bi bi-search"></i>
+                                <span class="badge bg-danger rounded-pill px-3 py-2">
+                                    Total: {{ $students->total() }}
                                 </span>
 
-                                <input type="text" name="search" id="studentSearch" class="form-control"
-                                    placeholder="Enter name, email, phone or course" value="{{ request('search') }}"
-                                    data-search-input autocomplete="off">
+                                @auth
+                                    <button
+                                        type="button"
+                                        class="btn btn-danger px-3 py-2 fw-semibold"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#studentModal"
+                                        id="addStudentBtn">
 
-                                <button type="button" class="btn btn-outline-secondary" id="clearStudentSearch"
-                                    aria-label="Clear search" style="{{ request('search') ? '' : 'display: none;' }}">
+                                        <i class="bi bi-plus-circle me-2"></i>
+                                        Add New Student
 
-                                    <i class="bi bi-x-lg"></i>
+                                    </button>
+                                @endauth
 
-                                </button>
+                            </div>
+                        </div>
+
+                        {{-- SEARCH AND STATUS FILTER --}}
+                        <form
+                            action="{{ route('students') }}"
+                            method="GET"
+                            class="row g-3 align-items-end mb-4"
+                            data-turbo-frame="students-list"
+                            id="studentSearchForm">
+
+                            {{-- SEARCH --}}
+                            <div class="col-md-5">
+
+                                <label for="studentSearch" class="form-label fw-semibold">
+                                    Search Students
+                                </label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text bg-white">
+                                        <i class="bi bi-search"></i>
+                                    </span>
+
+                                    <input
+                                        type="search"
+                                        name="search"
+                                        id="studentSearch"
+                                        class="form-control"
+                                        placeholder="Enter name, email, phone or course"
+                                        value="{{ request('search') }}"
+                                        autocomplete="off">
+
+                                </div>
 
                             </div>
 
-                        </div>
+                            {{-- STATUS FILTER --}}
+                            <div class="col-md-3">
 
-                        {{-- Status Filter --}}
-                        <div class="col-md-3">
+                                <label for="status_filter" class="form-label fw-semibold">
+                                    Filter by Status
+                                </label>
 
-                            <label for="status_filter" class="form-label fw-semibold">
-                                Filter by Status
-                            </label>
+                                <select
+                                    name="status"
+                                    id="status_filter"
+                                    class="form-select">
 
-                            <select name="status" id="status_filter" class="form-select" data-search-filter>
+                                    <option value="">All Students</option>
 
-                                <option value="">All Students</option>
+                                    <option
+                                        value="Active"
+                                        {{ request('status') == 'Active' ? 'selected' : '' }}>
+                                        Active
+                                    </option>
 
-                                <option value="Active" {{ request('status') == 'Active' ? 'selected' : '' }}>
-                                    Active
-                                </option>
+                                    <option
+                                        value="Inactive"
+                                        {{ request('status') == 'Inactive' ? 'selected' : '' }}>
+                                        Inactive
+                                    </option>
 
-                                <option value="Inactive" {{ request('status') == 'Inactive' ? 'selected' : '' }}>
-                                    Inactive
-                                </option>
+                                </select>
 
-                            </select>
+                            </div>
 
-                        </div>
+                        </form>
 
-                    </form>
+                        {{-- STUDENTS TABLE --}}
+                        <div class="table-responsive">
 
-                    {{-- Students table --}}
-                    <div class="table-responsive">
+                            <table class="table table-hover student-table">
 
-                        <table class="table table-hover student-table">
-
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Phone</th>
-                                    <th>Course</th>
-                                    <th>Status</th>
-                                    <th>Address</th>
-                                    @auth
-                                        <th>Actions</th>
-                                    @endauth
-                                </tr>
-                            </thead>
-
-                            <tbody data-search-results>
-
-                                @forelse($students as $index => $student)
-
+                                <thead>
                                     <tr>
-                                        <td>
-                                            {{ $students->firstItem() + $index }}
-                                        </td>
-
-                                        <td class="fw-semibold">
-                                            {{ $student->name }}
-                                        </td>
-
-                                        <td>{{ $student->email }}</td>
-
-                                        <td>{{ $student->phone ?? 'N/A' }}</td>
-
-                                        <td>{{ $student->course ?? 'N/A' }}</td>
-
-                                        <td>
-                                            @if($student->status === 'Active')
-                                                <span class="badge bg-success">
-                                                    Active
-                                                </span>
-                                            @else
-                                                <span class="badge bg-secondary">
-                                                    Inactive
-                                                </span>
-                                            @endif
-                                        </td>
-
-                                        <td style="white-space: normal; min-width: 150px;">
-                                            {{ $student->address ?? 'N/A' }}
-                                        </td>
+                                        <th>#</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                        <th>Course</th>
+                                        <th>Status</th>
+                                        <th>Address</th>
 
                                         @auth
+                                            <th>Actions</th>
+                                        @endauth
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+
+                                    @forelse($students as $index => $student)
+
+                                        <tr>
+
                                             <td>
-                                                <div class="d-flex gap-2">
+                                                {{ $students->firstItem() + $index }}
+                                            </td>
 
-                                                    {{-- Edit button --}}
-                                                    <button type="button" class="btn btn-sm btn-outline-primary editStudentBtn"
-                                                        title="Edit student" data-bs-toggle="modal"
-                                                        data-bs-target="#studentModal"
-                                                        data-url="{{ route('students.update', $student->id) }}"
-                                                        data-id="{{ $student->id }}" data-name="{{ $student->name }}"
-                                                        data-email="{{ $student->email }}" data-phone="{{ $student->phone }}"
-                                                        data-course="{{ $student->course }}"
-                                                        data-status="{{ $student->status }}"
-                                                        data-address="{{ $student->address }}">
+                                            <td class="fw-semibold">
+                                                {{ $student->name }}
+                                            </td>
 
-                                                        <i class="bi bi-pencil-fill"></i>
-                                                    </button>
+                                            <td>{{ $student->email }}</td>
 
-                                                    {{-- Delete button --}}
-                                                    <form action="{{ route('students.destroy', $student->id) }}" method="POST"
-                                                        onsubmit="return confirm('Are you sure you want to delete this student?')">
+                                            <td>{{ $student->phone ?? 'N/A' }}</td>
 
-                                                        @csrf
-                                                        @method('DELETE')
+                                            <td>{{ $student->course ?? 'N/A' }}</td>
 
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger"
-                                                            title="Delete student">
+                                            <td>
+                                                @if($student->status === 'Active')
+                                                    <span class="badge bg-success">
+                                                        Active
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-secondary">
+                                                        Inactive
+                                                    </span>
+                                                @endif
+                                            </td>
 
-                                                            <i class="bi bi-trash-fill"></i>
+                                            <td style="white-space: normal; min-width: 150px;">
+                                                {{ $student->address ?? 'N/A' }}
+                                            </td>
+
+                                            @auth
+                                                <td>
+
+                                                    <div class="d-flex gap-2">
+
+                                                        {{-- EDIT --}}
+                                                        <button
+                                                            type="button"
+                                                            class="btn btn-sm btn-outline-primary editStudentBtn"
+                                                            title="Edit student"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#studentModal"
+                                                            data-url="{{ route('students.update', $student->id) }}"
+                                                            data-id="{{ $student->id }}"
+                                                            data-name="{{ $student->name }}"
+                                                            data-email="{{ $student->email }}"
+                                                            data-phone="{{ $student->phone }}"
+                                                            data-course="{{ $student->course }}"
+                                                            data-status="{{ $student->status }}"
+                                                            data-address="{{ $student->address }}">
+
+                                                            <i class="bi bi-pencil-fill"></i>
+
                                                         </button>
 
-                                                    </form>
+                                                        {{-- DELETE --}}
+                                                        <form
+                                                            action="{{ route('students.destroy', $student->id) }}"
+                                                            method="POST"
+                                                            data-turbo="false"
+                                                            onsubmit="return confirm('Are you sure you want to delete this student?')">
 
-                                                </div>
+                                                            @csrf
+                                                            @method('DELETE')
+
+                                                            <button
+                                                                type="submit"
+                                                                class="btn btn-sm btn-outline-danger"
+                                                                title="Delete student">
+
+                                                                <i class="bi bi-trash-fill"></i>
+
+                                                            </button>
+
+                                                        </form>
+
+                                                    </div>
+
+                                                </td>
+                                            @endauth
+
+                                        </tr>
+
+                                    @empty
+
+                                        <tr>
+                                            <td
+                                                colspan="@auth 8 @else 7 @endauth"
+                                                class="text-center text-muted py-5">
+
+                                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+
+                                                No students found.
+
                                             </td>
-                                        @endauth
+                                        </tr>
 
-                                    </tr>
+                                    @endforelse
 
-                                @empty
+                                </tbody>
 
-                                    <tr>
-                                        <td colspan="8" class="text-center text-muted py-5">
+                            </table>
 
-                                            <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                        </div>
 
-                                            No students found.
+                        {{-- PAGINATION --}}
+                        <div class="custom-pagination mt-2">
+                            {{ $students->links('pagination::bootstrap-5') }}
+                        </div>
 
-                                        </td>
-                                    </tr>
-
-                                @endforelse
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-<div data-search-pagination class="custom-pagination">
-    {{ $students->links('pagination::bootstrap-5') }}
-</div>
-
-
-                    </div>
+                    </turbo-frame>
+                    {{-- TURBO FRAME END --}}
 
                 </div>
+
             </div>
 
         </div>
@@ -266,8 +325,12 @@
     </section>
 
 
-    {{-- Add / Edit Student Modal --}}
-    <div class="modal fade student-modal" id="studentModal" tabindex="-1" aria-labelledby="studentModalLabel"
+    {{-- ADD / EDIT STUDENT MODAL --}}
+    <div
+        class="modal fade student-modal"
+        id="studentModal"
+        tabindex="-1"
+        aria-labelledby="studentModalLabel"
         aria-hidden="true">
 
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
@@ -286,14 +349,18 @@
                         </small>
                     </div>
 
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
                     </button>
 
                 </div>
 
                 <div class="modal-body p-4">
 
-                    {{-- Validation errors --}}
+                    {{-- VALIDATION ERRORS --}}
                     @if($errors->any())
 
                         <div class="alert alert-danger">
@@ -312,103 +379,155 @@
 
                     @endif
 
-                    <form id="studentForm" action="{{ old('_editing_id')
+                    {{-- STUDENT FORM --}}
+                    <form
+                        id="studentForm"
+                        action="{{ old('_editing_id')
     ? route('students.update', old('_editing_id'))
-    : route('students.store') }}" method="POST">
+    : route('students.store') }}"
+                        method="POST"
+                        data-turbo="false">
 
                         @csrf
 
-                        {{-- Used to identify create or edit --}}
-                        <input type="hidden" name="_editing_id" id="editing_id" value="{{ old('_editing_id') }}">
+                        <input
+                            type="hidden"
+                            name="_editing_id"
+                            id="editing_id"
+                            value="{{ old('_editing_id') }}">
 
-                        {{-- Laravel method spoofing --}}
-                        <input type="hidden" name="_method" id="formMethod"
+                        <input
+                            type="hidden"
+                            name="_method"
+                            id="formMethod"
                             value="{{ old('_editing_id') ? 'PUT' : 'POST' }}">
 
                         <div class="row g-3">
 
-                            {{-- Name --}}
+                            {{-- NAME --}}
                             <div class="col-md-6">
                                 <label for="name" class="form-label fw-semibold">
                                     Full Name
                                 </label>
 
-                                <input type="text" name="name" id="name" class="form-control"
-                                    placeholder="Enter full name" value="{{ old('name') }}" required>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    id="name"
+                                    class="form-control"
+                                    placeholder="Enter full name"
+                                    value="{{ old('name') }}"
+                                    required>
                             </div>
 
-                            {{-- Email --}}
+                            {{-- EMAIL --}}
                             <div class="col-md-6">
                                 <label for="email" class="form-label fw-semibold">
                                     Email Address
                                 </label>
 
-                                <input type="email" name="email" id="email" class="form-control"
-                                    placeholder="example@email.com" value="{{ old('email') }}" required>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    id="email"
+                                    class="form-control"
+                                    placeholder="example@email.com"
+                                    value="{{ old('email') }}"
+                                    required>
                             </div>
 
-                            {{-- Phone --}}
+                            {{-- PHONE --}}
                             <div class="col-md-6">
                                 <label for="phone" class="form-label fw-semibold">
                                     Phone Number
                                 </label>
 
-                                <input type="tel" name="phone" id="phone" class="form-control"
-                                    pattern="^[0-9\s\+\-\(\)]+$" placeholder="Enter phone number"
+                                <input
+                                    type="tel"
+                                    name="phone"
+                                    id="phone"
+                                    class="form-control"
+                                    pattern="^[0-9\s\+\-\(\)]+$"
+                                    placeholder="Enter phone number"
                                     value="{{ old('phone') }}">
                             </div>
 
-                            {{-- Course --}}
+                            {{-- COURSE --}}
                             <div class="col-md-6">
                                 <label for="course" class="form-label fw-semibold">
                                     Course
                                 </label>
 
-                                <input type="text" name="course" id="course" class="form-control"
-                                    placeholder="Enter course name" value="{{ old('course') }}">
+                                <input
+                                    type="text"
+                                    name="course"
+                                    id="course"
+                                    class="form-control"
+                                    placeholder="Enter course name"
+                                    value="{{ old('course') }}">
                             </div>
 
-                            {{-- Status --}}
+                            {{-- STATUS --}}
                             <div class="col-md-6">
                                 <label for="status" class="form-label fw-semibold">
                                     Student Status
                                 </label>
 
-                                <select name="status" id="status" class="form-select" required>
+                                <select
+                                    name="status"
+                                    id="status"
+                                    class="form-select"
+                                    required>
 
-                                    <option value="Active" {{ old('status', 'Active') == 'Active' ? 'selected' : '' }}>
+                                    <option
+                                        value="Active"
+                                        {{ old('status', 'Active') == 'Active' ? 'selected' : '' }}>
                                         Active
                                     </option>
 
-                                    <option value="Inactive" {{ old('status') == 'Inactive' ? 'selected' : '' }}>
+                                    <option
+                                        value="Inactive"
+                                        {{ old('status') == 'Inactive' ? 'selected' : '' }}>
                                         Inactive
                                     </option>
 
                                 </select>
                             </div>
 
-                            {{-- Address --}}
+                            {{-- ADDRESS --}}
                             <div class="col-md-6">
                                 <label for="address" class="form-label fw-semibold">
                                     Address
                                 </label>
 
-                                <textarea name="address" id="address" rows="3" style="resize:none" class="form-control"
+                                <textarea
+                                    name="address"
+                                    id="address"
+                                    rows="3"
+                                    style="resize:none"
+                                    class="form-control"
                                     placeholder="Enter student address">{{ old('address') }}</textarea>
                             </div>
 
                         </div>
 
+                        {{-- FORM BUTTONS --}}
                         <div class="d-flex gap-2 mt-4">
 
-                            <button type="submit" class="btn btn-danger px-4 py-2 fw-semibold" id="saveStudentBtn">
+                            <button
+                                type="submit"
+                                class="btn btn-danger px-4 py-2 fw-semibold"
+                                id="saveStudentBtn">
 
                                 <i class="bi bi-person-plus me-2"></i>
                                 Save Student
 
                             </button>
 
-                            <button type="button" class="btn btn-outline-secondary px-4 py-2" data-bs-dismiss="modal">
+                            <button
+                                type="button"
+                                class="btn btn-outline-secondary px-4 py-2"
+                                data-bs-dismiss="modal">
 
                                 Cancel
 
@@ -419,19 +538,27 @@
                     </form>
 
                 </div>
+
             </div>
+
         </div>
+
     </div>
 
 
+    {{-- SUCCESS MODAL --}}
     <x-success-modal />
 
+    {{-- FOOTER --}}
     <x-footer />
 
-    {{-- Shared live search --}}
-    <script src="{{ asset('js/live-search.js') }}"></script>
+    {{-- BOOTSTRAP JS --}}
+    <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
 
+
+    {{-- STUDENT MODAL AND TURBO SEARCH JAVASCRIPT --}}
     <script>
+
         document.addEventListener('DOMContentLoaded', function () {
 
             const studentModal = document.getElementById('studentModal');
@@ -451,71 +578,140 @@
             const statusInput = document.getElementById('status');
             const addressInput = document.getElementById('address');
 
-            const addStudentBtn = document.getElementById('addStudentBtn');
-
             const addStudentUrl = @json(route('students.store'));
 
 
-            // Search Clear Button
-            const studentSearch = document.getElementById('studentSearch');
-            const clearStudentSearch = document.getElementById('clearStudentSearch');
+            // =====================================
+            // UPDATE SEARCH CLEAR BUTTON
+            // =====================================
 
             function updateClearButton() {
 
-                clearStudentSearch.style.display =
-                    studentSearch.value.trim() !== '' ? 'block' : 'none';
+                const searchInput = document.getElementById('studentSearch');
+                const clearButton = document.getElementById('clearStudentSearch');
 
+                if (!searchInput || !clearButton) return;
+
+                clearButton.style.display =
+                    searchInput.value.trim() !== '' ? 'block' : 'none';
             }
 
-            // Show or hide clear button while typing
-            studentSearch.addEventListener('input', updateClearButton);
 
-            // Clear search and trigger AJAX live search
-            clearStudentSearch.addEventListener('click', function () {
+            // =====================================
+            // LIVE SEARCH CLEAR BUTTON VISIBILITY
+            // =====================================
 
-                studentSearch.value = '';
+            document.addEventListener('input', function (event) {
 
-                updateClearButton();
-
-                // Trigger shared AJAX live search
-                studentSearch.dispatchEvent(new Event('input', {
-                    bubbles: true
-                }));
-
-                studentSearch.focus();
+                if (event.target.id === 'studentSearch') {
+                    updateClearButton();
+                }
 
             });
 
 
-            // Open modal for adding a new student
-            if (addStudentBtn) {
+            // =====================================
+            // CLEAR SEARCH - IOS SAFE
+            // =====================================
 
-                addStudentBtn.addEventListener('click', function () {
+            document.addEventListener('click', function (event) {
 
-                    studentForm.reset();
+                const clearButton = event.target.closest('#clearStudentSearch');
 
-                    studentForm.action = addStudentUrl;
+                if (!clearButton) return;
 
-                    editingId.value = '';
-                    formMethod.value = 'POST';
+                event.preventDefault();
 
-                    modalTitle.textContent = 'Add New Student';
+                const searchInput = document.getElementById('studentSearch');
 
-                    modalDescription.textContent =
-                        'Enter the student details below.';
+                if (!searchInput) return;
 
-                    saveButton.innerHTML =
-                        '<i class="bi bi-person-plus me-2"></i> Save Student';
+                const form = searchInput.closest('form');
 
-                    statusInput.value = 'Active';
+                // Clear the complete search value.
+                searchInput.value = '';
 
-                });
+                updateClearButton();
 
-            }
+                // Reset pagination.
+                if (form) {
+
+                    const pageInput = form.querySelector('input[name="page"]');
+
+                    if (pageInput) {
+                        pageInput.remove();
+                    }
+
+                    // Submit the form through Turbo.
+                    // Status filter remains selected.
+                    form.requestSubmit();
+
+                }
+
+                searchInput.focus();
+
+            });
 
 
-            // Open modal for editing an existing student.
-            // Event delegation keeps this working after AJAX search.
+            // =====================================
+            // STATUS FILTER
+            // =====================================
+
+            document.addEventListener('change', function (event) {
+
+                if (event.target.id !== 'status_filter') return;
+
+                const form = event.target.closest('form[data-turbo-frame]');
+
+                if (form) {
+
+                    const pageInput = form.querySelector('input[name="page"]');
+
+                    if (pageInput) {
+                        pageInput.remove();
+                    }
+
+                    form.requestSubmit();
+
+                }
+
+            });
+
+
+            // =====================================
+            // ADD STUDENT
+            // =====================================
+
+            document.addEventListener('click', function (event) {
+
+                const button = event.target.closest('#addStudentBtn');
+
+                if (!button) return;
+
+                studentForm.reset();
+
+                studentForm.action = addStudentUrl;
+
+                editingId.value = '';
+                formMethod.value = 'POST';
+
+                modalTitle.textContent = 'Add New Student';
+
+                modalDescription.textContent =
+                    'Enter the student details below.';
+
+                saveButton.innerHTML =
+                    '<i class="bi bi-person-plus me-2"></i> Save Student';
+
+                statusInput.value = 'Active';
+
+            });
+
+
+            // =====================================
+            // EDIT STUDENT
+            // =====================================
+
             document.addEventListener('click', function (event) {
 
                 const button = event.target.closest('.editStudentBtn');
@@ -545,7 +741,10 @@
             });
 
 
-            // Reopen modal if validation fails
+            // =====================================
+            // REOPEN MODAL AFTER VALIDATION FAILURE
+            // =====================================
+
             @if($errors->any())
 
                 const modal = new bootstrap.Modal(studentModal);
@@ -567,24 +766,28 @@
             @endif
 
 
-                // Automatically show success modal
-                @if(session('success'))
+            // =====================================
+            // SUCCESS MODAL
+            // =====================================
 
-                    const successModalElement =
-                        document.getElementById('successModal');
+            @if(session('success'))
 
-                    if (successModalElement) {
+                const successModalElement =
+                    document.getElementById('successModal');
 
-                        const successModal =
-                            new bootstrap.Modal(successModalElement);
+                if (successModalElement) {
 
-                        successModal.show();
+                    const successModal =
+                        new bootstrap.Modal(successModalElement);
 
-                    }
+                    successModal.show();
 
-                @endif
+                }
 
-    });
+            @endif
+
+        });
+
     </script>
 
 </body>
